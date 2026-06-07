@@ -6,7 +6,8 @@ export class Timeline {
     vars;
     duration = 0;
     delay;
-    startTime = 0;
+    playhead = 0;
+    reversed = false;
     started = false;
     completed = false;
     isPlaying = false;
@@ -18,9 +19,6 @@ export class Timeline {
             this.play();
         }
     }
-    /**
-     * Adds .to() tweens to the timeline. Supports multiple targets and stagger.
-     */
     to(target, vars, position) {
         const targets = resolveTargets(target);
         const baseTime = this.parsePosition(position);
@@ -33,9 +31,6 @@ export class Timeline {
         });
         return this;
     }
-    /**
-     * Adds .from() tweens to the timeline. Supports multiple targets and stagger.
-     */
     from(target, vars, position) {
         const targets = resolveTargets(target);
         const baseTime = this.parsePosition(position);
@@ -48,9 +43,6 @@ export class Timeline {
         });
         return this;
     }
-    /**
-     * Adds .fromTo() tweens to the timeline. Supports multiple targets and stagger.
-     */
     fromTo(target, fromVars, toVars, position) {
         const targets = resolveTargets(target);
         const baseTime = this.parsePosition(position);
@@ -64,11 +56,20 @@ export class Timeline {
         return this;
     }
     play() {
-        if (this.isPlaying)
-            return;
-        if (this.completed) {
-            this.completed = false;
-            this.startTime = 0;
+        this.reversed = false;
+        this.completed = false;
+        const maxTime = this.duration + this.delay;
+        if (this.playhead >= maxTime) {
+            this.playhead = 0;
+        }
+        this.isPlaying = true;
+        ticker.add(this.update);
+    }
+    reverse() {
+        this.reversed = true;
+        this.completed = false;
+        if (this.playhead <= 0) {
+            this.playhead = this.duration + this.delay;
         }
         this.isPlaying = true;
         ticker.add(this.update);
@@ -78,7 +79,6 @@ export class Timeline {
             return;
         this.isPlaying = false;
         ticker.remove(this.update);
-        this.startTime = 0;
     }
     kill() {
         this.isPlaying = false;
@@ -87,9 +87,6 @@ export class Timeline {
             child.tween.kill();
         }
     }
-    /**
-     * Helper to parse relative and absolute positions.
-     */
     parsePosition(position) {
         let startTime = this.duration;
         const prevChild = this.children[this.children.length - 1];
@@ -125,9 +122,6 @@ export class Timeline {
         }
         return startTime;
     }
-    /**
-     * Appends an individual Tween into the children list at a specific absolute start time.
-     */
     addTween(tween, startTime) {
         const tweenDuration = tween.duration + tween.delay;
         const endTime = startTime + tweenDuration;
@@ -139,13 +133,11 @@ export class Timeline {
         this.duration = Math.max(this.duration, endTime);
     }
     render(time) {
-        if (this.completed && time >= this.duration + this.delay)
-            return;
-        if (time < this.delay) {
-            return;
+        let activeTime = 0;
+        if (time >= this.delay) {
+            activeTime = time - this.delay;
         }
-        const activeTime = time - this.delay;
-        if (!this.started) {
+        if (!this.started && time >= this.delay) {
             this.started = true;
             if (this.vars.onStart) {
                 this.vars.onStart();
@@ -158,21 +150,32 @@ export class Timeline {
         if (this.vars.onUpdate) {
             this.vars.onUpdate();
         }
-        if (activeTime >= this.duration) {
-            this.completed = true;
+    }
+    update(totalTime, dt) {
+        if (this.completed)
+            return;
+        this.playhead += this.reversed ? -dt : dt;
+        const maxTime = this.duration + this.delay;
+        if (this.reversed) {
+            if (this.playhead <= 0) {
+                this.playhead = 0;
+                this.completed = true;
+            }
+        }
+        else {
+            if (this.playhead >= maxTime) {
+                this.playhead = maxTime;
+                this.completed = true;
+            }
+        }
+        this.render(this.playhead);
+        if (this.completed) {
             this.isPlaying = false;
             ticker.remove(this.update);
             if (this.vars.onComplete) {
                 this.vars.onComplete();
             }
         }
-    }
-    update(totalTime, _dt) {
-        if (this.startTime === 0) {
-            this.startTime = totalTime;
-        }
-        const elapsed = totalTime - this.startTime;
-        this.render(elapsed);
     }
 }
 //# sourceMappingURL=timeline.js.map

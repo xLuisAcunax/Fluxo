@@ -19,7 +19,8 @@ export class Tween {
     ease;
     fromVars;
     isFrom = false;
-    startTime = 0;
+    playhead = 0;
+    reversed = false;
     started = false;
     completed = false;
     propTweens = [];
@@ -135,29 +136,40 @@ export class Tween {
     applyTransform(el, state) {
         el.style.transform = `translate3d(${state.x}px, ${state.y}px, 0px) rotate(${state.rotation}deg) scale(${state.scale})`;
     }
-    render(time) {
-        if (this.completed && time >= this.duration + this.delay)
-            return;
-        if (time < this.delay) {
-            return;
+    play() {
+        this.reversed = false;
+        this.completed = false;
+        const maxTime = this.duration + this.delay;
+        if (this.playhead >= maxTime) {
+            this.playhead = 0;
         }
-        if (!this.started) {
+        ticker.add(this.update);
+    }
+    reverse() {
+        this.reversed = true;
+        this.completed = false;
+        if (this.playhead <= 0) {
+            this.playhead = this.duration + this.delay;
+        }
+        ticker.add(this.update);
+    }
+    pause() {
+        ticker.remove(this.update);
+    }
+    render(time) {
+        let progress = 0;
+        if (time >= this.delay) {
+            const activeTime = time - this.delay;
+            progress = this.duration > 0 ? activeTime / this.duration : 1;
+            if (progress > 1)
+                progress = 1;
+        }
+        if (!this.started && time >= this.delay) {
             this.started = true;
             this.initProperties();
             if (this.vars.onStart) {
                 this.vars.onStart();
             }
-        }
-        const activeTime = time - this.delay;
-        let progress = this.duration > 0 ? activeTime / this.duration : 1;
-        if (progress >= 1) {
-            progress = 1;
-            if (!this.completed) {
-                this.completed = true;
-            }
-        }
-        else {
-            this.completed = false;
         }
         const easedProgress = this.ease(progress);
         let hasTransform = false;
@@ -184,18 +196,30 @@ export class Tween {
         if (this.vars.onUpdate) {
             this.vars.onUpdate();
         }
-        if (this.completed && this.vars.onComplete) {
-            this.vars.onComplete();
-        }
     }
-    update(totalTime, _dt) {
-        if (this.startTime === 0) {
-            this.startTime = totalTime;
+    update(totalTime, dt) {
+        if (this.completed)
+            return;
+        this.playhead += this.reversed ? -dt : dt;
+        const maxTime = this.duration + this.delay;
+        if (this.reversed) {
+            if (this.playhead <= 0) {
+                this.playhead = 0;
+                this.completed = true;
+            }
         }
-        const timeSinceStart = totalTime - this.startTime;
-        this.render(timeSinceStart);
+        else {
+            if (this.playhead >= maxTime) {
+                this.playhead = maxTime;
+                this.completed = true;
+            }
+        }
+        this.render(this.playhead);
         if (this.completed) {
             ticker.remove(this.update);
+            if (this.vars.onComplete) {
+                this.vars.onComplete();
+            }
         }
     }
     kill() {

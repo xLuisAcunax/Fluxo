@@ -261,6 +261,13 @@
 
           <button class="btn-secondary" id="btn-tl-pause">Pause TL</button>
           <button class="btn-secondary" id="btn-tl-resume">Resume TL</button>
+          <button
+            class="btn-secondary"
+            id="btn-tl-reverse"
+            style="border-color: #ec4899; color: #ec4899"
+          >
+            Reverse TL
+          </button>
           <button class="btn-secondary" id="btn-scale">Pulse</button>
           <button class="btn-secondary" id="btn-fade">Fade Out</button>
           <button class="btn-secondary" id="btn-reset">Reset</button>
@@ -425,6 +432,17 @@
           log("No active timeline to resume.");
         }
       });
+
+      document
+        .getElementById("btn-tl-reverse")
+        .addEventListener("click", () => {
+          if (currentTimeline) {
+            log("Reversing Timeline... (All components playing backwards)");
+            currentTimeline.reverse();
+          } else {
+            log("No active timeline to reverse.");
+          }
+        });
 
       document.getElementById("btn-reset").addEventListener("click", () => {
         log("Resetting stage to default origin...");

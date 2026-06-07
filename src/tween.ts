@@ -7,6 +7,7 @@ export interface TweenVars {
   delay?: number;
   ease?: EasingName | EasingFunction;
   autoPlay?: boolean;
+  onStart?: () => void;
   onUpdate?: () => void;
   onComplete?: () => void;
   [key: string]: any;
@@ -48,7 +49,9 @@ export class Tween {
 
   private fromVars?: TweenVars;
   private isFrom: boolean = false;
-  private startTime: number = 0;
+
+  private playhead: number = 0;
+  private reversed: boolean = false;
   private started: boolean = false;
   private completed: boolean = false;
   private propTweens: PropTween[] = [];
@@ -186,31 +189,44 @@ export class Tween {
     el.style.transform = `translate3d(${state.x}px, ${state.y}px, 0px) rotate(${state.rotation}deg) scale(${state.scale})`;
   }
 
-  public render(time: number) {
-    if (this.completed && time >= this.duration + this.delay) return;
+  public play() {
+    this.reversed = false;
+    this.completed = false;
+    const maxTime = this.duration + this.delay;
+    if (this.playhead >= maxTime) {
+      this.playhead = 0;
+    }
+    ticker.add(this.update);
+  }
 
-    if (time < this.delay) {
-      return;
+  public reverse() {
+    this.reversed = true;
+    this.completed = false;
+    if (this.playhead <= 0) {
+      this.playhead = this.duration + this.delay;
+    }
+    ticker.add(this.update);
+  }
+
+  public pause() {
+    ticker.remove(this.update);
+  }
+
+  public render(time: number) {
+    let progress = 0;
+
+    if (time >= this.delay) {
+      const activeTime = time - this.delay;
+      progress = this.duration > 0 ? activeTime / this.duration : 1;
+      if (progress > 1) progress = 1;
     }
 
-    if (!this.started) {
+    if (!this.started && time >= this.delay) {
       this.started = true;
       this.initProperties();
       if (this.vars.onStart) {
         this.vars.onStart();
       }
-    }
-
-    const activeTime = time - this.delay;
-    let progress = this.duration > 0 ? activeTime / this.duration : 1;
-
-    if (progress >= 1) {
-      progress = 1;
-      if (!this.completed) {
-        this.completed = true;
-      }
-    } else {
-      this.completed = false;
     }
 
     const easedProgress = this.ease(progress);
@@ -242,22 +258,33 @@ export class Tween {
     if (this.vars.onUpdate) {
       this.vars.onUpdate();
     }
-
-    if (this.completed && this.vars.onComplete) {
-      this.vars.onComplete();
-    }
   }
 
-  private update(totalTime: number, _dt: number) {
-    if (this.startTime === 0) {
-      this.startTime = totalTime;
+  private update(totalTime: number, dt: number) {
+    if (this.completed) return;
+
+    this.playhead += this.reversed ? -dt : dt;
+
+    const maxTime = this.duration + this.delay;
+    if (this.reversed) {
+      if (this.playhead <= 0) {
+        this.playhead = 0;
+        this.completed = true;
+      }
+    } else {
+      if (this.playhead >= maxTime) {
+        this.playhead = maxTime;
+        this.completed = true;
+      }
     }
 
-    const timeSinceStart = totalTime - this.startTime;
-    this.render(timeSinceStart);
+    this.render(this.playhead);
 
     if (this.completed) {
       ticker.remove(this.update);
+      if (this.vars.onComplete) {
+        this.vars.onComplete();
+      }
     }
   }
 

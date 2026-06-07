@@ -4,6 +4,7 @@ export interface TweenVars {
     delay?: number;
     ease?: EasingName | EasingFunction;
     autoPlay?: boolean;
+    onStart?: () => void;
     onUpdate?: () => void;
     onComplete?: () => void;
     [key: string]: any;
@@ -16,7 +17,8 @@ export declare class Tween {
     private ease;
     private fromVars?;
     private isFrom;
-    private startTime;
+    private playhead;
+    private reversed;
     private started;
     private completed;
     private propTweens;
@@ -25,6 +27,9 @@ export declare class Tween {
     private parseValue;
     private getTransformState;
     private applyTransform;
+    play(): void;
+    reverse(): void;
+    pause(): void;
     render(time: number): void;
     private update;
     kill(): void;

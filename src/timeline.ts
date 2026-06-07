@@ -22,7 +22,8 @@ export class Timeline {
   private duration: number = 0;
   private delay: number;
 
-  private startTime: number = 0;
+  private playhead: number = 0;
+  private reversed: boolean = false;
   private started: boolean = false;
   private completed: boolean = false;
   private isPlaying: boolean = false;
@@ -38,9 +39,6 @@ export class Timeline {
     }
   }
 
-  /**
-   * Adds .to() tweens to the timeline. Supports multiple targets and stagger.
-   */
   to(target: any, vars: TweenVars, position?: number | string): this {
     const targets = resolveTargets(target);
     const baseTime = this.parsePosition(position);
@@ -57,9 +55,6 @@ export class Timeline {
     return this;
   }
 
-  /**
-   * Adds .from() tweens to the timeline. Supports multiple targets and stagger.
-   */
   from(target: any, vars: TweenVars, position?: number | string): this {
     const targets = resolveTargets(target);
     const baseTime = this.parsePosition(position);
@@ -81,9 +76,6 @@ export class Timeline {
     return this;
   }
 
-  /**
-   * Adds .fromTo() tweens to the timeline. Supports multiple targets and stagger.
-   */
   fromTo(
     target: any,
     fromVars: TweenVars,
@@ -106,11 +98,22 @@ export class Timeline {
   }
 
   play() {
-    if (this.isPlaying) return;
+    this.reversed = false;
+    this.completed = false;
+    const maxTime = this.duration + this.delay;
+    if (this.playhead >= maxTime) {
+      this.playhead = 0;
+    }
 
-    if (this.completed) {
-      this.completed = false;
-      this.startTime = 0;
+    this.isPlaying = true;
+    ticker.add(this.update);
+  }
+
+  reverse() {
+    this.reversed = true;
+    this.completed = false;
+    if (this.playhead <= 0) {
+      this.playhead = this.duration + this.delay;
     }
 
     this.isPlaying = true;
@@ -121,7 +124,6 @@ export class Timeline {
     if (!this.isPlaying) return;
     this.isPlaying = false;
     ticker.remove(this.update);
-    this.startTime = 0;
   }
 
   kill() {
@@ -132,9 +134,6 @@ export class Timeline {
     }
   }
 
-  /**
-   * Helper to parse relative and absolute positions.
-   */
   private parsePosition(position?: number | string): number {
     let startTime = this.duration;
     const prevChild = this.children[this.children.length - 1];
@@ -167,9 +166,6 @@ export class Timeline {
     return startTime;
   }
 
-  /**
-   * Appends an individual Tween into the children list at a specific absolute start time.
-   */
   private addTween(tween: Tween, startTime: number) {
     const tweenDuration = tween.duration + tween.delay;
     const endTime = startTime + tweenDuration;
@@ -184,15 +180,13 @@ export class Timeline {
   }
 
   public render(time: number) {
-    if (this.completed && time >= this.duration + this.delay) return;
+    let activeTime = 0;
 
-    if (time < this.delay) {
-      return;
+    if (time >= this.delay) {
+      activeTime = time - this.delay;
     }
 
-    const activeTime = time - this.delay;
-
-    if (!this.started) {
+    if (!this.started && time >= this.delay) {
       this.started = true;
       if (this.vars.onStart) {
         this.vars.onStart();
@@ -207,23 +201,34 @@ export class Timeline {
     if (this.vars.onUpdate) {
       this.vars.onUpdate();
     }
+  }
 
-    if (activeTime >= this.duration) {
-      this.completed = true;
+  private update(totalTime: number, dt: number) {
+    if (this.completed) return;
+
+    this.playhead += this.reversed ? -dt : dt;
+
+    const maxTime = this.duration + this.delay;
+    if (this.reversed) {
+      if (this.playhead <= 0) {
+        this.playhead = 0;
+        this.completed = true;
+      }
+    } else {
+      if (this.playhead >= maxTime) {
+        this.playhead = maxTime;
+        this.completed = true;
+      }
+    }
+
+    this.render(this.playhead);
+
+    if (this.completed) {
       this.isPlaying = false;
       ticker.remove(this.update);
       if (this.vars.onComplete) {
         this.vars.onComplete();
       }
     }
-  }
-
-  private update(totalTime: number, _dt: number) {
-    if (this.startTime === 0) {
-      this.startTime = totalTime;
-    }
-
-    const elapsed = totalTime - this.startTime;
-    this.render(elapsed);
   }
 }
