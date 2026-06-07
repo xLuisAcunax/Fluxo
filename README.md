@@ -2,6 +2,8 @@
 
 A lightweight, high-performance, and buttery-smooth TypeScript animation library. Coordinate tweening, timelines, scroll binds, staggers, and vector drawing with 0% idle CPU and zero scroll lag.
 
+👉 **[Explore the Live Interactive Showcase & Documentation](https://luis-acuna.dev/fluxo/examples/index.html)** 🚀
+
 Fluxo runs all animations through a centralized frame-rate independent Ticker loop using `requestAnimationFrame`, preventing layout thrashing and minimizing browser paint overhead.
 
 ---
