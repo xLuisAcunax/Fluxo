@@ -21,6 +21,19 @@ export class Timeline {
         }
     }
     /**
+     * Adds an existing, externally created Tween instance to this timeline.
+     * Useful for inserting custom tweens like fluxo.drawSVG().
+     *
+     * @param tween The Tween instance to add.
+     * @param position Optional position key (number, relative offset like "+=0.5", or alignment like "<").
+     */
+    add(tween, position) {
+        tween.pause(); // Prevent the tween from ticking independently
+        const baseTime = this.parsePosition(position);
+        this.addTween(tween, baseTime);
+        return this;
+    }
+    /**
      * Adds .to() tweens to the timeline.
      */
     to(target, vars, position) {
