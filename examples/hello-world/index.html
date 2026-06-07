@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Fluxo - Hello World Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg-color: #0b0f19;
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --card-border: rgba(255, 255, 255, 0.08);
+        --primary: #8b5cf6;
+        --secondary: #ec4899;
+        --text: #f3f4f6;
+        --text-muted: #9ca3af;
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: "Outfit", sans-serif;
+        background-color: var(--bg-color);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        overflow-x: hidden;
+        background-image:
+          radial-gradient(
+            at 0% 0%,
+            rgba(139, 92, 246, 0.15) 0px,
+            transparent 50%
+          ),
+          radial-gradient(
+            at 100% 100%,
+            rgba(236, 72, 153, 0.15) 0px,
+            transparent 50%
+          );
+      }
+
+      .container {
+        max-width: 800px;
+        width: 100%;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2rem;
+      }
+
+      h1 {
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: linear-gradient(to right, var(--primary), var(--secondary));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.05em;
+      }
+
+      p.subtitle {
+        color: var(--text-muted);
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+      }
+
+      .card {
+        background: var(--card-bg);
+        border: 1px solid var(--card-border);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-radius: 24px;
+        padding: 2.5rem;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      }
+
+      .stage {
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px dashed var(--card-border);
+        border-radius: 16px;
+        height: 250px;
+        width: 100%;
+        position: relative;
+        display: flex;
+        align-items: center;
+        padding: 0 40px;
+        overflow: hidden;
+      }
+
+      .box {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, var(--primary), var(--secondary));
+        border-radius: 18px;
+        box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
+        cursor: pointer;
+      }
+
+      .controls {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      button {
+        font-family: inherit;
+        font-weight: 600;
+        font-size: 0.95rem;
+        padding: 0.8rem 1.6rem;
+        border-radius: 12px;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .btn-primary {
+        background: var(--primary);
+        color: white;
+        box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);
+      }
+
+      .btn-primary:hover {
+        background: #7c3aed;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+      }
+
+      .btn-secondary {
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text);
+        border: 1px solid var(--card-border);
+      }
+
+      .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+      }
+
+      button:active {
+        transform: translateY(0);
+      }
+
+      .console {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 1rem;
+        font-family: "Courier New", Courier, monospace;
+        font-size: 0.85rem;
+        color: #34d399;
+        height: 120px;
+        overflow-y: auto;
+        width: 100%;
+      }
+
+      .console-line {
+        margin-bottom: 0.25rem;
+        opacity: 0.9;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div style="text-align: center">
+        <h1>Fluxo</h1>
+        <p class="subtitle">
+          A lightweight, professional, and efficient animation library
+        </p>
+      </div>
+
+      <div class="card">
+        <div class="stage">
+          <div class="box" id="box"></div>
+        </div>
+
+        <div class="controls">
+          <button class="btn-primary" id="btn-animate">Run Animation</button>
+          <button class="btn-secondary" id="btn-reset">Reset</button>
+          <button class="btn-secondary" id="btn-scale">
+            Pulse (Scale & Rotate)
+          </button>
+          <button class="btn-secondary" id="btn-fade">Fade Out</button>
+        </div>
+
+        <div class="console" id="console">
+          <div class="console-line">
+            > System ready. Press "Run Animation" to test Fluxo.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { fluxo } from "../../dist/index.js";
+
+      const box = document.getElementById("box");
+      const consoleEl = document.getElementById("console");
+
+      function log(message) {
+        const line = document.createElement("div");
+        line.className = "console-line";
+        line.textContent = `> ${new Date().toLocaleTimeString()}: ${message}`;
+        consoleEl.appendChild(line);
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+      }
+
+      document.getElementById("btn-animate").addEventListener("click", () => {
+        log("Starting animation: x -> 300px, rotation -> 360deg");
+
+        fluxo.to(box, {
+          x: 300,
+          rotation: 360,
+          duration: 1.5,
+          ease: "power2.out",
+          onStart: () => log("Animation started!"),
+          onComplete: () => log("Animation complete! (Ticker paused)"),
+        });
+      });
+
+      document.getElementById("btn-reset").addEventListener("click", () => {
+        log("Resetting box to origin...");
+
+        fluxo.to(box, {
+          x: 0,
+          rotation: 0,
+          scale: 1,
+          opacity: 1,
+          duration: 0.8,
+          ease: "power1.out",
+          onComplete: () => log("Reset complete"),
+        });
+      });
+
+      document.getElementById("btn-scale").addEventListener("click", () => {
+        log("Starting pulse animation...");
+
+        fluxo.to(box, {
+          scale: 1.4,
+          rotation: 180,
+          duration: 0.6,
+          ease: "power2.out",
+          onComplete: () => {
+            log("Pulse peak reached. Returning to normal...");
+            fluxo.to(box, {
+              scale: 1,
+              rotation: 360,
+              duration: 0.6,
+              ease: "power1.inOut",
+            });
+          },
+        });
+      });
+
+      document.getElementById("btn-fade").addEventListener("click", () => {
+        log("Fading out...");
+        fluxo.to(box, {
+          opacity: 0.2,
+          duration: 1,
+          ease: "power1.out",
+          onComplete: () => log("Fade out complete"),
+        });
+      });
+    </script>
+  </body>
+</html>
