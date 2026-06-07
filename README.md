@@ -148,6 +148,12 @@ If you want to contribute or modify Fluxo:
 
 ---
 
+## Contributing
+
+We welcome contributions of all kinds! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) guide for details on how to report issues, suggest features, or submit pull requests.
+
+---
+
 ## License
 
 MIT License. Free for both personal and commercial use.
