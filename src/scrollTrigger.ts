@@ -11,6 +11,8 @@ export interface ScrollTriggerVars {
 }
 
 export class ScrollTrigger {
+  private static instances: ScrollTrigger[] = [];
+
   private animation: Tween | Timeline;
   private triggerEl: HTMLElement;
   private vars: ScrollTriggerVars;
@@ -22,6 +24,7 @@ export class ScrollTrigger {
   constructor(animation: Tween | Timeline, vars: ScrollTriggerVars) {
     this.animation = animation;
     this.vars = vars;
+    ScrollTrigger.instances.push(this);
 
     const resolved = resolveTargets(vars.trigger);
     if (resolved.length === 0) {
@@ -140,5 +143,15 @@ export class ScrollTrigger {
   public kill() {
     window.removeEventListener("scroll", this.onScroll);
     window.removeEventListener("resize", this.refresh);
+    const idx = ScrollTrigger.instances.indexOf(this);
+    if (idx !== -1) {
+      ScrollTrigger.instances.splice(idx, 1);
+    }
+  }
+
+  public static killAll() {
+    const list = [...ScrollTrigger.instances];
+    list.forEach(instance => instance.kill());
+    ScrollTrigger.instances = [];
   }
 }

@@ -14,7 +14,7 @@ Fluxo coordinates all animations through a centralized frame-rate independent Ti
 - **Timelines**: Advanced chaining and sequencing with relative position offsets (`+=`, `-=`, `<`) and timeline-wide flow controls.
 - **Multiple Targets & Staggers**: Sequenced animations with simple stagger delays on element collections.
 - **ScrollTrigger**: Bind animations to scroll progress (`scrub: true`) or trigger them when entering customizable viewport thresholds (cached limits on resize for 60fps scrolling).
-- **Looping & Controls**: Interactive `.play()`, `.pause()`, and `.reverse()` playback paired with `.repeat` and `.yoyo` bounce loops.
+- **Looping & Controls**: Interactive `.play()`, `.pause()`, and `.reverse()` playback paired with `.repeat` and `.alternate` bounce loops.
 
 ---
 

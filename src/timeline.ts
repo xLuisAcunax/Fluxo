@@ -12,7 +12,7 @@ export interface TimelineVars {
   delay?: number;
   paused?: boolean;
   repeat?: number;
-  yoyo?: boolean;
+  alternate?: boolean;
   onStart?: () => void;
   onUpdate?: () => void;
   onComplete?: () => void;
@@ -239,7 +239,7 @@ export class Timeline {
 
     const maxTime = this.duration + this.delay;
     const repeatOption = this.vars.repeat !== undefined ? this.vars.repeat : 0;
-    const yoyoOption = this.vars.yoyo === true;
+    const alternateOption = this.vars.alternate === true;
 
     if (this.reversed) {
       if (this.playhead <= this.delay) {
@@ -249,7 +249,7 @@ export class Timeline {
             this.vars.onRepeat();
           }
 
-          if (yoyoOption) {
+          if (alternateOption) {
             this.reversed = false;
             this.playhead = this.delay;
           } else {
@@ -268,7 +268,7 @@ export class Timeline {
             this.vars.onRepeat();
           }
 
-          if (yoyoOption) {
+          if (alternateOption) {
             this.reversed = true;
             this.playhead = maxTime;
           } else {

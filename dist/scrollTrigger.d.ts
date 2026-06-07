@@ -8,6 +8,7 @@ export interface ScrollTriggerVars {
     once?: boolean;
 }
 export declare class ScrollTrigger {
+    private static instances;
     private animation;
     private triggerEl;
     private vars;
@@ -19,4 +20,5 @@ export declare class ScrollTrigger {
     private calculateScrollPos;
     private onScroll;
     kill(): void;
+    static killAll(): void;
 }

@@ -3,7 +3,7 @@ export interface TimelineVars {
     delay?: number;
     paused?: boolean;
     repeat?: number;
-    yoyo?: boolean;
+    alternate?: boolean;
     onStart?: () => void;
     onUpdate?: () => void;
     onComplete?: () => void;

@@ -2,6 +2,69 @@ import { Tween } from "./tween.js";
 import { Timeline } from "./timeline.js";
 import { ScrollTrigger } from "./scrollTrigger.js";
 import { resolveTargets, splitText } from "./utils.js";
+import { EasingName, EasingFunction } from "./easings.js";
+
+export function slidingMenu(
+  containerSelector: any,
+  linksSelector: string,
+  pillSelector: any,
+  options: {
+    duration?: number;
+    ease?: EasingName | EasingFunction;
+  } = {},
+) {
+  const container = resolveTargets(containerSelector)[0];
+  const pill = resolveTargets(pillSelector)[0];
+  const links = container
+    ? Array.from(container.querySelectorAll(linksSelector))
+    : [];
+
+  if (!container || !pill || links.length === 0) return;
+
+  const duration = options.duration !== undefined ? options.duration : 0.35;
+  const ease = options.ease || "veryFast.out";
+
+  const movePill = (linkEl: HTMLElement) => {
+    const rect = linkEl.getBoundingClientRect();
+    const parentRect = container.getBoundingClientRect();
+
+    const targetLeft = rect.left - parentRect.left;
+    const targetWidth = rect.width;
+    const targetTop = rect.top - parentRect.top;
+    const targetHeight = rect.height;
+
+    new Tween(pill, {
+      left: targetLeft,
+      width: targetWidth,
+      top: targetTop,
+      height: targetHeight,
+      opacity: 1,
+      duration: duration,
+      ease: ease,
+      autoPlay: true,
+    });
+  };
+
+  links.forEach((link) => {
+    if (!(link instanceof HTMLElement)) return;
+    link.addEventListener("mouseenter", () => movePill(link), {
+      passive: true,
+    });
+  });
+
+  container.addEventListener(
+    "mouseleave",
+    () => {
+      new Tween(pill, {
+        opacity: 0,
+        duration: 0.3,
+        ease: "medium.out",
+        autoPlay: true,
+      });
+    },
+    { passive: true },
+  );
+}
 
 export function magnetic(
   target: any,
@@ -9,8 +72,8 @@ export function magnetic(
     strength?: number;
     proximity?: number;
     duration?: number;
-    ease?: string;
-  } = {}
+    ease?: EasingName | EasingFunction;
+  } = {},
 ) {
   const resolved = resolveTargets(target);
   const strength = options.strength !== undefined ? options.strength : 0.45;
@@ -39,7 +102,7 @@ export function magnetic(
           y: deltaY * strength,
           duration: duration,
           ease: ease,
-          autoPlay: true
+          autoPlay: true,
         });
       } else if (isInside) {
         isInside = false;
@@ -48,7 +111,7 @@ export function magnetic(
           y: 0,
           duration: 0.6,
           ease: "medium.out",
-          autoPlay: true
+          autoPlay: true,
         });
       }
     };
@@ -63,12 +126,13 @@ export function tilt(
     maxTilt?: number;
     perspective?: number;
     duration?: number;
-    ease?: string;
-  } = {}
+    ease?: EasingName | EasingFunction;
+  } = {},
 ) {
   const resolved = resolveTargets(target);
   const maxTilt = options.maxTilt !== undefined ? options.maxTilt : 25;
-  const perspective = options.perspective !== undefined ? options.perspective : 800;
+  const perspective =
+    options.perspective !== undefined ? options.perspective : 800;
   const duration = options.duration !== undefined ? options.duration : 0.2;
   const ease = options.ease || "veryFast.out";
 
@@ -85,14 +149,14 @@ export function tilt(
       el.style.setProperty("--mouse-x", `${pctX}%`);
       el.style.setProperty("--mouse-y", `${pctY}%`);
 
-      const tiltX = ((mouseY / rect.height) - 0.5) * -maxTilt;
-      const tiltY = ((mouseX / rect.width) - 0.5) * maxTilt;
+      const tiltX = (mouseY / rect.height - 0.5) * -maxTilt;
+      const tiltY = (mouseX / rect.width - 0.5) * maxTilt;
 
       new Tween(el, {
         transform: `perspective(${perspective}px) rotateX(${tiltX}deg) rotateY(${tiltY}deg)`,
         duration: duration,
         ease: ease,
-        autoPlay: true
+        autoPlay: true,
       });
     };
 
@@ -101,7 +165,7 @@ export function tilt(
         transform: `perspective(${perspective}px) rotateX(0deg) rotateY(0deg)`,
         duration: 0.6,
         ease: "medium.out",
-        autoPlay: true
+        autoPlay: true,
       });
       el.style.setProperty("--mouse-x", "50%");
       el.style.setProperty("--mouse-y", "50%");
@@ -118,8 +182,8 @@ export function explodeOnScroll(
     strength?: number;
     start?: string;
     end?: string;
-    ease?: string;
-  } = {}
+    ease?: EasingName | EasingFunction;
+  } = {},
 ) {
   const resolved = resolveTargets(target);
   const strength = options.strength !== undefined ? options.strength : 1.0;
@@ -145,7 +209,7 @@ export function explodeOnScroll(
         opacity: 0,
         duration: 1,
         ease: ease,
-        autoPlay: false
+        autoPlay: false,
       });
       tl.add(tween, 0);
     });
@@ -154,7 +218,7 @@ export function explodeOnScroll(
       trigger: el,
       start: start,
       end: end,
-      scrub: true
+      scrub: true,
     });
   });
 }
@@ -165,8 +229,8 @@ export function implodeOnScroll(
     strength?: number;
     start?: string;
     end?: string;
-    ease?: string;
-  } = {}
+    ease?: EasingName | EasingFunction;
+  } = {},
 ) {
   const resolved = resolveTargets(target);
   const strength = options.strength !== undefined ? options.strength : 1.0;
@@ -194,15 +258,15 @@ export function implodeOnScroll(
           opacity: 1,
           duration: 1,
           ease: ease,
-          autoPlay: false
+          autoPlay: false,
         },
         {
           x: startX,
           y: startY,
           rotation: startRot,
           scale: startScale,
-          opacity: 0
-        }
+          opacity: 0,
+        },
       );
       tl.add(tween, 0);
     });
@@ -211,7 +275,7 @@ export function implodeOnScroll(
       trigger: el,
       start: start,
       end: end,
-      scrub: true
+      scrub: true,
     });
   });
 }
@@ -222,12 +286,17 @@ export function revealText(
     type?: "chars" | "words";
     stagger?: number;
     duration?: number;
-    ease?: string;
+    ease?: EasingName | EasingFunction;
     delay?: number;
-  } = {}
+  } = {},
 ) {
   const type = options.type || "chars";
-  const stagger = options.stagger !== undefined ? options.stagger : (type === "chars" ? 0.03 : 0.12);
+  const stagger =
+    options.stagger !== undefined
+      ? options.stagger
+      : type === "chars"
+        ? 0.03
+        : 0.12;
   const duration = options.duration !== undefined ? options.duration : 0.8;
   const ease = options.ease || "veryFast.out";
   const delay = options.delay !== undefined ? options.delay : 0;
@@ -248,14 +317,14 @@ export function revealText(
           rotation: 0,
           duration: duration,
           ease: ease,
-          autoPlay: false
+          autoPlay: false,
         },
         {
           opacity: 0,
           y: 40,
           scale: 0.5,
-          rotation: 15
-        }
+          rotation: 15,
+        },
       );
       tl.add(tween, i * stagger);
     });
@@ -270,10 +339,10 @@ export function scrollReveal(
     stagger?: number;
     y?: number;
     duration?: number;
-    ease?: string;
+    ease?: EasingName | EasingFunction;
     start?: string;
     once?: boolean;
-  } = {}
+  } = {},
 ) {
   const resolved = resolveTargets(target);
   const stagger = options.stagger !== undefined ? options.stagger : 0.1;
@@ -295,12 +364,12 @@ export function scrollReveal(
         y: 0,
         duration: duration,
         ease: ease,
-        autoPlay: false
+        autoPlay: false,
       },
       {
         opacity: 0,
-        y: y
-      }
+        y: y,
+      },
     );
     tl.add(tween, i * stagger);
   });
@@ -308,6 +377,6 @@ export function scrollReveal(
   new ScrollTrigger(tl, {
     trigger: resolved[0],
     start: start,
-    once: once
+    once: once,
   });
 }

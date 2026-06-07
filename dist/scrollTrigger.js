@@ -1,5 +1,6 @@
 import { resolveTargets } from "./utils.js";
 export class ScrollTrigger {
+    static instances = [];
     animation;
     triggerEl;
     vars;
@@ -9,6 +10,7 @@ export class ScrollTrigger {
     constructor(animation, vars) {
         this.animation = animation;
         this.vars = vars;
+        ScrollTrigger.instances.push(this);
         const resolved = resolveTargets(vars.trigger);
         if (resolved.length === 0) {
             throw new Error(`ScrollTrigger: Target trigger element not found for "${vars.trigger}"`);
@@ -97,6 +99,15 @@ export class ScrollTrigger {
     kill() {
         window.removeEventListener("scroll", this.onScroll);
         window.removeEventListener("resize", this.refresh);
+        const idx = ScrollTrigger.instances.indexOf(this);
+        if (idx !== -1) {
+            ScrollTrigger.instances.splice(idx, 1);
+        }
+    }
+    static killAll() {
+        const list = [...ScrollTrigger.instances];
+        list.forEach(instance => instance.kill());
+        ScrollTrigger.instances = [];
     }
 }
 //# sourceMappingURL=scrollTrigger.js.map

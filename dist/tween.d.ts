@@ -5,7 +5,7 @@ export interface TweenVars {
     ease?: EasingName | EasingFunction;
     autoPlay?: boolean;
     repeat?: number;
-    yoyo?: boolean;
+    alternate?: boolean;
     onStart?: () => void;
     onUpdate?: () => void;
     onComplete?: () => void;

@@ -182,7 +182,7 @@ export class Timeline {
         this.playhead += this.reversed ? -dt : dt;
         const maxTime = this.duration + this.delay;
         const repeatOption = this.vars.repeat !== undefined ? this.vars.repeat : 0;
-        const yoyoOption = this.vars.yoyo === true;
+        const alternateOption = this.vars.alternate === true;
         if (this.reversed) {
             if (this.playhead <= this.delay) {
                 if (repeatOption === -1 || this.repeatCount < repeatOption) {
@@ -190,7 +190,7 @@ export class Timeline {
                     if (this.vars.onRepeat) {
                         this.vars.onRepeat();
                     }
-                    if (yoyoOption) {
+                    if (alternateOption) {
                         this.reversed = false;
                         this.playhead = this.delay;
                     }
@@ -211,7 +211,7 @@ export class Timeline {
                     if (this.vars.onRepeat) {
                         this.vars.onRepeat();
                     }
-                    if (yoyoOption) {
+                    if (alternateOption) {
                         this.reversed = true;
                         this.playhead = maxTime;
                     }

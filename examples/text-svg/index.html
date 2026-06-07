@@ -282,8 +282,8 @@
   <header>
     <div class="logo">Fluxo Engine</div>
     <nav class="nav-links">
-      <a href="../hello-world/index.html">Básicos</a>
-      <a href="../scroll/index.html">ScrollTrigger</a>
+      <a href="../hello-world/index.html">Basics</a>
+      <a href="../scroll/index.html">Scroll Animator</a>
       <a href="#text-split">SplitText</a>
       <a href="#svg-draw">DrawSVG</a>
       <a href="#scroll-draw">Scroll + Draw</a>
@@ -295,15 +295,15 @@
       <div class="controls">
         <button class="btn" id="btnReplayText">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
-          Reanimar Texto
+          Replay Text
         </button>
         <button class="btn btn-secondary" id="btnWordsToggle">
-          Modo: Caracteres
+          Mode: Characters
         </button>
       </div>
-      <h1 class="anim-title" id="textTarget">Diseña animaciones web fluidas, ligeras y ultra-rápidas.</h1>
+      <h1 class="anim-title" id="textTarget">Design fluid, lightweight, and ultra-fast web animations.</h1>
       <p class="section-subtitle">
-        Nuestro módulo <code>splitText</code> desglosa párrafos y encabezados en caracteres o palabras para permitir increíbles cascadas (staggers) de texto interactivas.
+        Our <code>splitText</code> module splits paragraphs and headings into characters or words to enable amazing interactive text staggers.
       </p>
     </div>
   </section>
@@ -311,13 +311,13 @@
   <section id="svg-draw">
     <h2 class="section-title">DrawSVG Engine</h2>
     <p class="section-subtitle">
-      Dibuja vectores SVG de forma dinámica calculando la longitud del trazo de forma automática y animando el offset del guion en tiempo de ejecución.
+      Dynamically draws SVG vectors by automatically calculating path length and animating the stroke offset at runtime.
     </p>
 
     <div class="controls">
       <button class="btn" id="btnPlayDraw">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-        Dibujar Vector
+        Draw Vector
       </button>
     </div>
 
@@ -331,7 +331,7 @@
 
   <section id="scroll-draw">
     <h2 class="section-title">Scroll Scrubbing & DrawSVG</h2>
-    <div class="scroll-draw-text">Haz Scroll para Dibujar el Sello del Infinito</div>
+    <div class="scroll-draw-text">Scroll to Draw the Infinity Symbol</div>
     
     <div class="svg-container" style="max-width: 400px; border-color: rgba(236,72,153,0.15)">
       <svg class="drawing-svg" viewBox="0 0 200 100">
@@ -342,13 +342,13 @@
 
     <div class="scroll-guide">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>
-      <span>Scroll para ver el efecto de trazado síncrono</span>
+      <span>Scroll to see the synchronous drawing effect</span>
     </div>
   </section>
 
   <footer style="padding: 6rem 5% 4rem; text-align: center; border-top: 1px solid var(--border-color); color: var(--text-muted); font-size: 0.9rem; background: rgba(9, 9, 11, 0.4); backdrop-filter: blur(12px);">
     <p style="margin-bottom: 0.5rem; color: var(--text-main); font-weight: 500; font-family: var(--font-title); letter-spacing: 0.5px;">FLUXO ANIMATION ENGINE</p>
-    <p>Licencia MIT. Creado para animaciones web de alto rendimiento.</p>
+    <p>MIT License. Built for high-performance web animations.</p>
   </footer>
 
   <script type="module">
@@ -360,7 +360,7 @@
 
     function animateText() {
       if (currentSpans.length > 0) {
-        textTarget.innerHTML = "Diseña animaciones web fluidas, ligeras y ultra-rápidas.";
+        textTarget.innerHTML = "Design fluid, lightweight, and ultra-fast web animations.";
       }
 
       currentSpans = fluxo.splitText(textTarget, { type: splitMode });
@@ -386,7 +386,7 @@
 
     document.getElementById('btnWordsToggle').addEventListener('click', () => {
       splitMode = splitMode === 'chars' ? 'words' : 'chars';
-      document.getElementById('btnWordsToggle').textContent = `Modo: ${splitMode === 'chars' ? 'Caracteres' : 'Palabras'}`;
+      document.getElementById('btnWordsToggle').textContent = `Mode: ${splitMode === 'chars' ? 'Characters' : 'Words'}`;
       animateText();
     });
 
@@ -428,7 +428,7 @@
 
     const infinityTween = fluxo.drawSVG('#infinityPath', {
       duration: 1,
-      scrollTrigger: {
+      scroll: {
         trigger: '#scroll-draw',
         start: 'top 65%',
         end: 'bottom 85%',
@@ -438,7 +438,7 @@
 
     const coreTween = fluxo.drawSVG('#infinityCore', {
       duration: 1,
-      scrollTrigger: {
+      scroll: {
         trigger: '#scroll-draw',
         start: 'top 55%',
         end: 'bottom 80%',

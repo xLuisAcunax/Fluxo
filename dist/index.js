@@ -2,16 +2,17 @@ import { Tween } from "./tween.js";
 import { Timeline } from "./timeline.js";
 import { ScrollTrigger } from "./scrollTrigger.js";
 import { resolveTargets, splitText, drawSVG } from "./utils.js";
+import { magnetic, tilt, explodeOnScroll, implodeOnScroll, revealText, scrollReveal, slidingMenu, } from "./effects.js";
 export const fluxo = {
     /**
      * Creates an animation that goes FROM the current values of the target
-     * TO the values defined in 'vars'. Supports multiple targets, stagger, and ScrollTrigger.
+     * TO the values defined in 'vars'. Supports multiple targets, stagger, and scroll animator.
      */
     to(target, vars) {
         const targets = resolveTargets(target);
-        const hasScrollTrigger = vars.scrollTrigger !== undefined;
+        const hasScroll = vars.scroll !== undefined;
         const varsWithAutoPlay = { ...vars };
-        if (hasScrollTrigger) {
+        if (hasScroll) {
             varsWithAutoPlay.autoPlay = false;
         }
         let animation;
@@ -36,29 +37,29 @@ export const fluxo = {
             delete tweenVars.onUpdate;
             delete tweenVars.onComplete;
             delete tweenVars.stagger;
-            delete tweenVars.scrollTrigger;
+            delete tweenVars.scroll;
             targets.forEach((t, i) => {
                 tl.to(t, tweenVars, i * stagger);
             });
-            if (!hasScrollTrigger) {
+            if (!hasScroll) {
                 tl.play();
             }
             animation = tl;
         }
-        if (hasScrollTrigger && vars.scrollTrigger) {
-            new ScrollTrigger(animation, vars.scrollTrigger);
+        if (hasScroll && vars.scroll) {
+            new ScrollTrigger(animation, vars.scroll);
         }
         return animation;
     },
     /**
      * Creates an animation that goes FROM the values defined in 'vars'
-     * TO the current values of the target. Supports multiple targets, stagger, and ScrollTrigger.
+     * TO the current values of the target. Supports multiple targets, stagger, and scroll animator.
      */
     from(target, vars) {
         const targets = resolveTargets(target);
-        const hasScrollTrigger = vars.scrollTrigger !== undefined;
+        const hasScroll = vars.scroll !== undefined;
         const varsWithAutoPlay = { ...vars };
-        if (hasScrollTrigger) {
+        if (hasScroll) {
             varsWithAutoPlay.autoPlay = false;
         }
         let animation;
@@ -83,29 +84,29 @@ export const fluxo = {
             delete tweenVars.onUpdate;
             delete tweenVars.onComplete;
             delete tweenVars.stagger;
-            delete tweenVars.scrollTrigger;
+            delete tweenVars.scroll;
             targets.forEach((t, i) => {
                 tl.from(t, tweenVars, i * stagger);
             });
-            if (!hasScrollTrigger) {
+            if (!hasScroll) {
                 tl.play();
             }
             animation = tl;
         }
-        if (hasScrollTrigger && vars.scrollTrigger) {
-            new ScrollTrigger(animation, vars.scrollTrigger);
+        if (hasScroll && vars.scroll) {
+            new ScrollTrigger(animation, vars.scroll);
         }
         return animation;
     },
     /**
      * Creates an animation that goes FROM the values defined in 'fromVars'
-     * TO the values defined in 'toVars'. Supports multiple targets, stagger, and ScrollTrigger.
+     * TO the values defined in 'toVars'. Supports multiple targets, stagger, and scroll animator.
      */
     fromTo(target, fromVars, toVars) {
         const targets = resolveTargets(target);
-        const hasScrollTrigger = toVars.scrollTrigger !== undefined;
+        const hasScroll = toVars.scroll !== undefined;
         const toVarsWithAutoPlay = { ...toVars };
-        if (hasScrollTrigger) {
+        if (hasScroll) {
             toVarsWithAutoPlay.autoPlay = false;
         }
         let animation;
@@ -130,17 +131,17 @@ export const fluxo = {
             delete tweenVars.onUpdate;
             delete tweenVars.onComplete;
             delete tweenVars.stagger;
-            delete tweenVars.scrollTrigger;
+            delete tweenVars.scroll;
             targets.forEach((t, i) => {
                 tl.fromTo(t, fromVars, tweenVars, i * stagger);
             });
-            if (!hasScrollTrigger) {
+            if (!hasScroll) {
                 tl.play();
             }
             animation = tl;
         }
-        if (hasScrollTrigger && toVars.scrollTrigger) {
-            new ScrollTrigger(animation, toVars.scrollTrigger);
+        if (hasScroll && toVars.scroll) {
+            new ScrollTrigger(animation, toVars.scroll);
         }
         return animation;
     },
@@ -148,14 +149,14 @@ export const fluxo = {
      * Creates a new Timeline instance for sequencing multiple animations.
      */
     timeline(vars) {
-        const hasScrollTrigger = vars?.scrollTrigger !== undefined;
+        const hasScroll = vars?.scroll !== undefined;
         const timelineVars = { ...vars };
-        if (hasScrollTrigger) {
+        if (hasScroll) {
             timelineVars.paused = true;
         }
         const tl = new Timeline(timelineVars);
-        if (hasScrollTrigger && vars?.scrollTrigger) {
-            new ScrollTrigger(tl, vars.scrollTrigger);
+        if (hasScroll && vars?.scroll) {
+            new ScrollTrigger(tl, vars.scroll);
         }
         return tl;
     },
@@ -170,16 +171,40 @@ export const fluxo = {
      * Animates the outline drawing of SVG paths.
      */
     drawSVG(target, vars) {
-        const hasScrollTrigger = vars.scrollTrigger !== undefined;
+        const hasScroll = vars.scroll !== undefined;
         const varsWithAutoPlay = { ...vars };
-        if (hasScrollTrigger) {
+        if (hasScroll) {
             varsWithAutoPlay.autoPlay = false;
         }
         const tween = drawSVG(target, varsWithAutoPlay);
-        if (hasScrollTrigger && vars.scrollTrigger) {
-            new ScrollTrigger(tween, vars.scrollTrigger);
+        if (hasScroll && vars.scroll) {
+            new ScrollTrigger(tween, vars.scroll);
         }
         return tween;
+    },
+    magnetic(target, options) {
+        magnetic(target, options);
+    },
+    tilt(target, options) {
+        tilt(target, options);
+    },
+    explodeOnScroll(target, options) {
+        explodeOnScroll(target, options);
+    },
+    implodeOnScroll(target, options) {
+        implodeOnScroll(target, options);
+    },
+    revealText(target, options) {
+        revealText(target, options);
+    },
+    scrollReveal(target, options) {
+        scrollReveal(target, options);
+    },
+    slidingMenu(container, links, pill, options) {
+        slidingMenu(container, links, pill, options);
+    },
+    killAllTriggers() {
+        ScrollTrigger.killAll();
     },
 };
 export { Tween } from "./tween.js";
@@ -188,4 +213,5 @@ export { ScrollTrigger } from "./scrollTrigger.js";
 export { ticker } from "./ticker.js";
 export { easings } from "./easings.js";
 export { resolveTargets, splitText, drawSVG } from "./utils.js";
+export * from "./effects.js";
 //# sourceMappingURL=index.js.map

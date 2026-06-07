@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fluxo - ScrollTrigger Showcase</title>
+    <title>Fluxo - Scroll Animator Showcase</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -213,14 +213,12 @@
   <body>
     <section>
       <div style="text-align: center; max-width: 600px">
-        <h1>Fluxo ScrollTrigger</h1>
+        <h1>Fluxo Scroll Animator</h1>
         <p class="subtitle">
           Buttery smooth scroll-driven animations with 0% scroll lag
         </p>
         <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.6">
-          Desplázate hacia abajo lentamente para ver cómo Fluxo vincula las
-          animaciones al scroll de la página (scrubbing) o las inicia una vez
-          que entran en la pantalla.
+          Scroll down slowly to see how Fluxo binds animations to the page scroll (scrubbing) or starts them once they enter the viewport.
         </p>
       </div>
 
@@ -234,8 +232,7 @@
       <div class="card" id="trigger1">
         <h2>1. Play-on-Enter</h2>
         <p style="color: var(--text-muted)">
-          Esta caja se desliza y gira al entrar en el <b>75%</b> del alto del
-          viewport. Si subes de nuevo, la animación se rebobina.
+          This box slides and rotates when entering <b>75%</b> of the viewport height. If you scroll back up, the animation reverses.
         </p>
         <div class="sliding-box" id="box1"></div>
       </div>
@@ -245,9 +242,7 @@
       <div class="card" id="trigger2">
         <h2>2. Interactive Scrub</h2>
         <p style="color: var(--text-muted)">
-          La escala, rotación y opacidad de este círculo están vinculados
-          <b>directamente al scroll</b>. Muévete hacia arriba y abajo para
-          controlarlo.
+          The scale, rotation, and opacity of this circle are linked <b>directly to the scroll position</b>. Move up and down to control it.
         </p>
         <div class="scrubbing-circle" id="circle1"></div>
       </div>
@@ -257,8 +252,7 @@
       <div style="text-align: center; width: 100%">
         <h2>3. Staggered Grid Entry</h2>
         <p class="subtitle">
-          Estas tarjetas entran con stagger cuando la sección se activa por
-          primera vez
+          These cards reveal with a stagger when the section is entered for the first time.
         </p>
 
         <div class="stagger-grid" id="trigger3">
@@ -298,7 +292,7 @@
           opacity: 1,
           duration: 1.2,
           ease: "medium.out",
-          scrollTrigger: {
+          scroll: {
             trigger: "#trigger1",
             start: "top 75%",
             once: false,
@@ -319,7 +313,7 @@
           opacity: 1,
           duration: 1.0,
           ease: "slow.out",
-          scrollTrigger: {
+          scroll: {
             trigger: "#trigger2",
             start: "top 80%",
             end: "bottom 20%",
@@ -342,7 +336,7 @@
           duration: 0.8,
           stagger: 0.15,
           ease: "medium.out",
-          scrollTrigger: {
+          scroll: {
             trigger: "#trigger3",
             start: "top 80%",
             once: true,
