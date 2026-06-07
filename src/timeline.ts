@@ -17,10 +17,11 @@ export interface TimelineVars {
 }
 
 export class Timeline {
+  public duration: number = 0;
+  public delay: number;
+
   private children: TimelineChild[] = [];
   private vars: TimelineVars;
-  private duration: number = 0;
-  private delay: number;
 
   private playhead: number = 0;
   private reversed: boolean = false;

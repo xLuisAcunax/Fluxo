@@ -2,10 +2,10 @@ import { Tween } from "./tween.js";
 import { ticker } from "./ticker.js";
 import { resolveTargets } from "./utils.js";
 export class Timeline {
-    children = [];
-    vars;
     duration = 0;
     delay;
+    children = [];
+    vars;
     playhead = 0;
     reversed = false;
     started = false;

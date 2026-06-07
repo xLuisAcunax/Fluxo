@@ -7,10 +7,10 @@ export interface TimelineVars {
     onComplete?: () => void;
 }
 export declare class Timeline {
+    duration: number;
+    delay: number;
     private children;
     private vars;
-    private duration;
-    private delay;
     private playhead;
     private reversed;
     private started;
