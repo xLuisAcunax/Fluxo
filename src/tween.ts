@@ -7,9 +7,12 @@ export interface TweenVars {
   delay?: number;
   ease?: EasingName | EasingFunction;
   autoPlay?: boolean;
+  repeat?: number;
+  yoyo?: boolean;
   onStart?: () => void;
   onUpdate?: () => void;
   onComplete?: () => void;
+  onRepeat?: () => void;
   [key: string]: any;
 }
 
@@ -35,9 +38,12 @@ const RESERVED_KEYS = new Set([
   "delay",
   "ease",
   "autoPlay",
+  "repeat",
+  "yoyo",
   "onStart",
   "onUpdate",
   "onComplete",
+  "onRepeat",
 ]);
 
 export class Tween {
@@ -54,6 +60,7 @@ export class Tween {
   private reversed: boolean = false;
   private started: boolean = false;
   private completed: boolean = false;
+  private repeatCount: number = 0;
   private propTweens: PropTween[] = [];
 
   constructor(
@@ -195,6 +202,7 @@ export class Tween {
     const maxTime = this.duration + this.delay;
     if (this.playhead >= maxTime) {
       this.playhead = 0;
+      this.repeatCount = 0;
     }
     ticker.add(this.update);
   }
@@ -204,6 +212,7 @@ export class Tween {
     this.completed = false;
     if (this.playhead <= 0) {
       this.playhead = this.duration + this.delay;
+      this.repeatCount = 0;
     }
     ticker.add(this.update);
   }
@@ -266,15 +275,46 @@ export class Tween {
     this.playhead += this.reversed ? -dt : dt;
 
     const maxTime = this.duration + this.delay;
+    const repeatOption = this.vars.repeat !== undefined ? this.vars.repeat : 0;
+    const yoyoOption = this.vars.yoyo === true;
+
     if (this.reversed) {
-      if (this.playhead <= 0) {
-        this.playhead = 0;
-        this.completed = true;
+      if (this.playhead <= this.delay) {
+        if (repeatOption === -1 || this.repeatCount < repeatOption) {
+          this.repeatCount++;
+          if (this.vars.onRepeat) {
+            this.vars.onRepeat();
+          }
+
+          if (yoyoOption) {
+            this.reversed = false;
+            this.playhead = this.delay;
+          } else {
+            this.playhead = maxTime;
+          }
+        } else {
+          this.playhead = 0;
+          this.completed = true;
+        }
       }
     } else {
       if (this.playhead >= maxTime) {
-        this.playhead = maxTime;
-        this.completed = true;
+        if (repeatOption === -1 || this.repeatCount < repeatOption) {
+          this.repeatCount++;
+          if (this.vars.onRepeat) {
+            this.vars.onRepeat();
+          }
+
+          if (yoyoOption) {
+            this.reversed = true;
+            this.playhead = maxTime;
+          } else {
+            this.playhead = this.delay;
+          }
+        } else {
+          this.playhead = maxTime;
+          this.completed = true;
+        }
       }
     }
 

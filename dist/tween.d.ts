@@ -4,9 +4,12 @@ export interface TweenVars {
     delay?: number;
     ease?: EasingName | EasingFunction;
     autoPlay?: boolean;
+    repeat?: number;
+    yoyo?: boolean;
     onStart?: () => void;
     onUpdate?: () => void;
     onComplete?: () => void;
+    onRepeat?: () => void;
     [key: string]: any;
 }
 export declare class Tween {
@@ -21,6 +24,7 @@ export declare class Tween {
     private reversed;
     private started;
     private completed;
+    private repeatCount;
     private propTweens;
     constructor(target: any, vars: TweenVars, fromVars?: TweenVars, isFrom?: boolean);
     private initProperties;

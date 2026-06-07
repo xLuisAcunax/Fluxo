@@ -11,23 +11,26 @@ interface TimelineChild {
 export interface TimelineVars {
   delay?: number;
   paused?: boolean;
+  repeat?: number;
+  yoyo?: boolean;
   onStart?: () => void;
   onUpdate?: () => void;
   onComplete?: () => void;
+  onRepeat?: () => void;
 }
 
 export class Timeline {
-  public duration: number = 0;
-  public delay: number;
-
   private children: TimelineChild[] = [];
   private vars: TimelineVars;
+  public duration: number = 0;
+  public delay: number;
 
   private playhead: number = 0;
   private reversed: boolean = false;
   private started: boolean = false;
   private completed: boolean = false;
   private isPlaying: boolean = false;
+  private repeatCount: number = 0;
 
   constructor(vars: TimelineVars = {}) {
     this.vars = vars;
@@ -40,6 +43,9 @@ export class Timeline {
     }
   }
 
+  /**
+   * Adds .to() tweens to the timeline.
+   */
   to(target: any, vars: TweenVars, position?: number | string): this {
     const targets = resolveTargets(target);
     const baseTime = this.parsePosition(position);
@@ -56,6 +62,9 @@ export class Timeline {
     return this;
   }
 
+  /**
+   * Adds .from() tweens to the timeline.
+   */
   from(target: any, vars: TweenVars, position?: number | string): this {
     const targets = resolveTargets(target);
     const baseTime = this.parsePosition(position);
@@ -77,6 +86,9 @@ export class Timeline {
     return this;
   }
 
+  /**
+   * Adds .fromTo() tweens to the timeline.
+   */
   fromTo(
     target: any,
     fromVars: TweenVars,
@@ -104,6 +116,7 @@ export class Timeline {
     const maxTime = this.duration + this.delay;
     if (this.playhead >= maxTime) {
       this.playhead = 0;
+      this.repeatCount = 0;
     }
 
     this.isPlaying = true;
@@ -115,6 +128,7 @@ export class Timeline {
     this.completed = false;
     if (this.playhead <= 0) {
       this.playhead = this.duration + this.delay;
+      this.repeatCount = 0;
     }
 
     this.isPlaying = true;
@@ -210,15 +224,46 @@ export class Timeline {
     this.playhead += this.reversed ? -dt : dt;
 
     const maxTime = this.duration + this.delay;
+    const repeatOption = this.vars.repeat !== undefined ? this.vars.repeat : 0;
+    const yoyoOption = this.vars.yoyo === true;
+
     if (this.reversed) {
-      if (this.playhead <= 0) {
-        this.playhead = 0;
-        this.completed = true;
+      if (this.playhead <= this.delay) {
+        if (repeatOption === -1 || this.repeatCount < repeatOption) {
+          this.repeatCount++;
+          if (this.vars.onRepeat) {
+            this.vars.onRepeat();
+          }
+
+          if (yoyoOption) {
+            this.reversed = false;
+            this.playhead = this.delay;
+          } else {
+            this.playhead = maxTime;
+          }
+        } else {
+          this.playhead = 0;
+          this.completed = true;
+        }
       }
     } else {
       if (this.playhead >= maxTime) {
-        this.playhead = maxTime;
-        this.completed = true;
+        if (repeatOption === -1 || this.repeatCount < repeatOption) {
+          this.repeatCount++;
+          if (this.vars.onRepeat) {
+            this.vars.onRepeat();
+          }
+
+          if (yoyoOption) {
+            this.reversed = true;
+            this.playhead = maxTime;
+          } else {
+            this.playhead = this.delay;
+          }
+        } else {
+          this.playhead = maxTime;
+          this.completed = true;
+        }
       }
     }
 

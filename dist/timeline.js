@@ -2,15 +2,16 @@ import { Tween } from "./tween.js";
 import { ticker } from "./ticker.js";
 import { resolveTargets } from "./utils.js";
 export class Timeline {
-    duration = 0;
-    delay;
     children = [];
     vars;
+    duration = 0;
+    delay;
     playhead = 0;
     reversed = false;
     started = false;
     completed = false;
     isPlaying = false;
+    repeatCount = 0;
     constructor(vars = {}) {
         this.vars = vars;
         this.delay = vars.delay !== undefined ? vars.delay : 0;
@@ -19,6 +20,9 @@ export class Timeline {
             this.play();
         }
     }
+    /**
+     * Adds .to() tweens to the timeline.
+     */
     to(target, vars, position) {
         const targets = resolveTargets(target);
         const baseTime = this.parsePosition(position);
@@ -31,6 +35,9 @@ export class Timeline {
         });
         return this;
     }
+    /**
+     * Adds .from() tweens to the timeline.
+     */
     from(target, vars, position) {
         const targets = resolveTargets(target);
         const baseTime = this.parsePosition(position);
@@ -43,6 +50,9 @@ export class Timeline {
         });
         return this;
     }
+    /**
+     * Adds .fromTo() tweens to the timeline.
+     */
     fromTo(target, fromVars, toVars, position) {
         const targets = resolveTargets(target);
         const baseTime = this.parsePosition(position);
@@ -61,6 +71,7 @@ export class Timeline {
         const maxTime = this.duration + this.delay;
         if (this.playhead >= maxTime) {
             this.playhead = 0;
+            this.repeatCount = 0;
         }
         this.isPlaying = true;
         ticker.add(this.update);
@@ -70,6 +81,7 @@ export class Timeline {
         this.completed = false;
         if (this.playhead <= 0) {
             this.playhead = this.duration + this.delay;
+            this.repeatCount = 0;
         }
         this.isPlaying = true;
         ticker.add(this.update);
@@ -156,16 +168,48 @@ export class Timeline {
             return;
         this.playhead += this.reversed ? -dt : dt;
         const maxTime = this.duration + this.delay;
+        const repeatOption = this.vars.repeat !== undefined ? this.vars.repeat : 0;
+        const yoyoOption = this.vars.yoyo === true;
         if (this.reversed) {
-            if (this.playhead <= 0) {
-                this.playhead = 0;
-                this.completed = true;
+            if (this.playhead <= this.delay) {
+                if (repeatOption === -1 || this.repeatCount < repeatOption) {
+                    this.repeatCount++;
+                    if (this.vars.onRepeat) {
+                        this.vars.onRepeat();
+                    }
+                    if (yoyoOption) {
+                        this.reversed = false;
+                        this.playhead = this.delay;
+                    }
+                    else {
+                        this.playhead = maxTime;
+                    }
+                }
+                else {
+                    this.playhead = 0;
+                    this.completed = true;
+                }
             }
         }
         else {
             if (this.playhead >= maxTime) {
-                this.playhead = maxTime;
-                this.completed = true;
+                if (repeatOption === -1 || this.repeatCount < repeatOption) {
+                    this.repeatCount++;
+                    if (this.vars.onRepeat) {
+                        this.vars.onRepeat();
+                    }
+                    if (yoyoOption) {
+                        this.reversed = true;
+                        this.playhead = maxTime;
+                    }
+                    else {
+                        this.playhead = this.delay;
+                    }
+                }
+                else {
+                    this.playhead = maxTime;
+                    this.completed = true;
+                }
             }
         }
         this.render(this.playhead);
