@@ -1,17 +1,39 @@
 {
-  "name": "fluxo",
+  "name": "fluxo-animation",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "build": "tsc",
-    "watch": "tsc -w"
+  "description": "A lightweight, high-performance, and buttery-smooth animation library.",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
   },
-  "keywords": [],
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs,iife --global-name fluxo --dts --clean",
+    "watch": "tsup src/index.ts --format esm,cjs,iife --global-name fluxo --dts --clean --watch"
+  },
+  "keywords": [
+    "animation",
+    "tween",
+    "timeline",
+    "scroll-animation",
+    "performance",
+    "stagger",
+    "splittext",
+    "drawsvg"
+  ],
   "author": "",
   "license": "MIT",
   "type": "module",
   "devDependencies": {
+    "tsup": "^8.0.2",
     "typescript": "^6.0.3"
   }
 }
