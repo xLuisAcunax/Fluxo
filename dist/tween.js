@@ -5,6 +5,7 @@ const RESERVED_KEYS = new Set([
     "duration",
     "delay",
     "ease",
+    "autoPlay",
     "onStart",
     "onUpdate",
     "onComplete",
@@ -12,11 +13,11 @@ const RESERVED_KEYS = new Set([
 export class Tween {
     target;
     vars;
-    fromVars;
-    isFrom = false;
     duration;
     delay;
     ease;
+    fromVars;
+    isFrom = false;
     startTime = 0;
     started = false;
     completed = false;
@@ -35,12 +36,16 @@ export class Tween {
         this.delay = vars.delay !== undefined ? vars.delay : 0;
         this.ease = getEasing(vars.ease);
         this.update = this.update.bind(this);
+        const autoPlay = vars.autoPlay !== false;
         if (this.target) {
             if (this.isFrom || this.fromVars) {
                 this.initProperties();
                 this.started = true;
             }
-            ticker.add(this.update);
+            // Solo registrar en el Ticker si el usuario no especificó autoPlay: false
+            if (autoPlay) {
+                ticker.add(this.update);
+            }
         }
     }
     initProperties() {
@@ -134,14 +139,14 @@ export class Tween {
     applyTransform(el, state) {
         el.style.transform = `translate3d(${state.x}px, ${state.y}px, 0px) rotate(${state.rotation}deg) scale(${state.scale})`;
     }
-    update(totalTime, _dt) {
-        if (this.completed)
+    /**
+     * Renderiza el frame del tween en un tiempo específico transcurrido (time).
+     * Este método puede ser llamado externamente (por un Timeline) o internamente (por el Ticker).
+     */
+    render(time) {
+        if (this.completed && time >= this.duration + this.delay)
             return;
-        if (this.startTime === 0) {
-            this.startTime = totalTime;
-        }
-        const timeSinceStart = totalTime - this.startTime;
-        if (timeSinceStart < this.delay) {
+        if (time < this.delay) {
             return;
         }
         if (!this.started) {
@@ -151,11 +156,16 @@ export class Tween {
                 this.vars.onStart();
             }
         }
-        const activeTime = timeSinceStart - this.delay;
+        const activeTime = time - this.delay;
         let progress = this.duration > 0 ? activeTime / this.duration : 1;
         if (progress >= 1) {
             progress = 1;
-            this.completed = true;
+            if (!this.completed) {
+                this.completed = true;
+            }
+        }
+        else {
+            this.completed = false;
         }
         const easedProgress = this.ease(progress);
         let hasTransform = false;
@@ -182,11 +192,18 @@ export class Tween {
         if (this.vars.onUpdate) {
             this.vars.onUpdate();
         }
+        if (this.completed && this.vars.onComplete) {
+            this.vars.onComplete();
+        }
+    }
+    update(totalTime, _dt) {
+        if (this.startTime === 0) {
+            this.startTime = totalTime;
+        }
+        const timeSinceStart = totalTime - this.startTime;
+        this.render(timeSinceStart);
         if (this.completed) {
             ticker.remove(this.update);
-            if (this.vars.onComplete) {
-                this.vars.onComplete();
-            }
         }
     }
     kill() {

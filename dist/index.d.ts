@@ -1,4 +1,5 @@
 import { Tween, TweenVars } from "./tween.js";
+import { Timeline, TimelineVars } from "./timeline.js";
 export declare const fluxo: {
     /**
      * Creates an animation that goes FROM the current values of the target
@@ -25,7 +26,14 @@ export declare const fluxo: {
      * @param toVars Target properties (including duration, delay, ease, and callbacks).
      */
     fromTo(target: any, fromVars: TweenVars, toVars: TweenVars): Tween;
+    /**
+     * Creates a new Timeline instance for sequencing multiple animations.
+     *
+     * @param vars Configuration object containing timeline delay, paused state, and callbacks.
+     */
+    timeline(vars?: TimelineVars): Timeline;
 };
 export { Tween, type TweenVars } from "./tween.js";
+export { Timeline, type TimelineVars } from "./timeline.js";
 export { ticker } from "./ticker.js";
 export { easings } from "./easings.js";

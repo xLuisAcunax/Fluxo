@@ -214,6 +214,19 @@
           >
             Run .fromTo()
           </button>
+          <button
+            class="btn-primary"
+            id="btn-timeline"
+            style="
+              background: #10b981;
+              box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            "
+          >
+            Run Timeline
+          </button>
+
+          <button class="btn-secondary" id="btn-tl-pause">Pause TL</button>
+          <button class="btn-secondary" id="btn-tl-resume">Resume TL</button>
           <button class="btn-secondary" id="btn-scale">Pulse</button>
           <button class="btn-secondary" id="btn-fade">Fade Out</button>
           <button class="btn-secondary" id="btn-reset">Reset</button>
@@ -221,7 +234,7 @@
 
         <div class="console" id="console">
           <div class="console-line">
-            > System ready. Test fluxo.to(), .from() or .fromTo()!
+            > System ready. Test fluxo.timeline() with play/pause!
           </div>
         </div>
       </div>
@@ -231,6 +244,7 @@
       import { fluxo } from "../../dist/index.js";
       const box = document.getElementById("box");
       const consoleEl = document.getElementById("console");
+      let currentTimeline = null;
       function log(message) {
         const line = document.createElement("div");
         line.className = "console-line";
@@ -262,8 +276,7 @@
           rotation: 180,
           duration: 1.5,
           ease: "medium.out",
-          onStart: () =>
-            log(".from() animation started! (Box snapped immediately)"),
+          onStart: () => log(".from() animation started!"),
           onComplete: () => log(".from() animation complete!"),
         });
       });
@@ -290,11 +303,59 @@
         );
       });
 
+      document.getElementById("btn-timeline").addEventListener("click", () => {
+        log("Creating and playing new Timeline...");
+
+        box.style.transform =
+          "translate3d(0px, 0px, 0px) rotate(0deg) scale(1)";
+        box.style.opacity = "1";
+
+        if (currentTimeline) {
+          currentTimeline.kill();
+        }
+        currentTimeline = fluxo.timeline({
+          onStart: () => log("Timeline started!"),
+          onComplete: () => log("Timeline finished! (All steps processed)"),
+        });
+        currentTimeline
+          .to(box, { x: 250, duration: 1.0, ease: "medium.out" })
+          .to(box, { y: 60, duration: 0.8, ease: "medium.out" })
+          .to(box, { rotation: 180, duration: 0.6, ease: "medium.inOut" })
+          .to(
+            box,
+            { scale: 0.5, opacity: 0.4, duration: 0.6, ease: "slow.out" },
+            "<",
+          );
+      });
+
+      document.getElementById("btn-tl-pause").addEventListener("click", () => {
+        if (currentTimeline) {
+          log("Timeline paused.");
+          currentTimeline.pause();
+        } else {
+          log("No active timeline to pause.");
+        }
+      });
+
+      document.getElementById("btn-tl-resume").addEventListener("click", () => {
+        if (currentTimeline) {
+          log("Timeline resumed.");
+          currentTimeline.play();
+        } else {
+          log("No active timeline to resume.");
+        }
+      });
+
       document.getElementById("btn-reset").addEventListener("click", () => {
         log("Resetting box to default origin...");
+        if (currentTimeline) {
+          currentTimeline.kill();
+          currentTimeline = null;
+        }
 
         fluxo.to(box, {
           x: 0,
+          y: 0,
           rotation: 0,
           scale: 1,
           opacity: 1,

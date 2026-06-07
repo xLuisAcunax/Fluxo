@@ -3,19 +3,19 @@ export interface TweenVars {
     duration?: number;
     delay?: number;
     ease?: EasingName | EasingFunction;
-    onStart?: () => void;
+    autoPlay?: boolean;
     onUpdate?: () => void;
     onComplete?: () => void;
     [key: string]: any;
 }
 export declare class Tween {
-    private target;
-    private vars;
+    target: any;
+    vars: TweenVars;
+    duration: number;
+    delay: number;
+    private ease;
     private fromVars?;
     private isFrom;
-    private duration;
-    private delay;
-    private ease;
     private startTime;
     private started;
     private completed;
@@ -25,6 +25,11 @@ export declare class Tween {
     private parseValue;
     private getTransformState;
     private applyTransform;
+    /**
+     * Renderiza el frame del tween en un tiempo específico transcurrido (time).
+     * Este método puede ser llamado externamente (por un Timeline) o internamente (por el Ticker).
+     */
+    render(time: number): void;
     private update;
     kill(): void;
 }

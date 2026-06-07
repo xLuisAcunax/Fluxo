@@ -1,4 +1,7 @@
 import { Tween, TweenVars } from "./tween.js";
+import { Timeline, TimelineVars } from "./timeline.js";
+import { ticker } from "./ticker.js";
+import { easings } from "./easings.js";
 
 export const fluxo = {
   /**
@@ -34,8 +37,18 @@ export const fluxo = {
   fromTo(target: any, fromVars: TweenVars, toVars: TweenVars): Tween {
     return new Tween(target, toVars, fromVars);
   },
+
+  /**
+   * Creates a new Timeline instance for sequencing multiple animations.
+   *
+   * @param vars Configuration object containing timeline delay, paused state, and callbacks.
+   */
+  timeline(vars?: TimelineVars): Timeline {
+    return new Timeline(vars);
+  },
 };
 
 export { Tween, type TweenVars } from "./tween.js";
+export { Timeline, type TimelineVars } from "./timeline.js";
 export { ticker } from "./ticker.js";
 export { easings } from "./easings.js";
