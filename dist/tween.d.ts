@@ -11,6 +11,8 @@ export interface TweenVars {
 export declare class Tween {
     private target;
     private vars;
+    private fromVars?;
+    private isFrom;
     private duration;
     private delay;
     private ease;
@@ -18,7 +20,7 @@ export declare class Tween {
     private started;
     private completed;
     private propTweens;
-    constructor(target: any, vars: TweenVars);
+    constructor(target: any, vars: TweenVars, fromVars?: TweenVars, isFrom?: boolean);
     private initProperties;
     private parseValue;
     private getTransformState;

@@ -27,6 +27,7 @@ interface TransformState {
 }
 
 const TRANSFORM_KEYS = new Set(["x", "y", "rotation", "scale"]);
+
 const RESERVED_KEYS = new Set([
   "duration",
   "delay",
@@ -39,6 +40,8 @@ const RESERVED_KEYS = new Set([
 export class Tween {
   private target: any;
   private vars: TweenVars;
+  private fromVars?: TweenVars;
+  private isFrom: boolean = false;
   private duration: number;
   private delay: number;
   private ease: EasingFunction;
@@ -48,19 +51,33 @@ export class Tween {
   private completed: boolean = false;
   private propTweens: PropTween[] = [];
 
-  constructor(target: any, vars: TweenVars) {
+  constructor(
+    target: any,
+    vars: TweenVars,
+    fromVars?: TweenVars,
+    isFrom: boolean = false,
+  ) {
     if (typeof target === "string" && typeof document !== "undefined") {
       this.target = document.querySelector(target);
     } else {
       this.target = target;
     }
+
     this.vars = vars;
+    this.fromVars = fromVars;
+    this.isFrom = isFrom;
     this.duration = vars.duration !== undefined ? vars.duration : 0.5;
     this.delay = vars.delay !== undefined ? vars.delay : 0;
     this.ease = getEasing(vars.ease);
 
     this.update = this.update.bind(this);
+
     if (this.target) {
+      if (this.isFrom || this.fromVars) {
+        this.initProperties();
+        this.started = true;
+      }
+
       ticker.add(this.update);
     }
   }
@@ -70,43 +87,76 @@ export class Tween {
     const isDOM =
       this.target instanceof HTMLElement ||
       (typeof SVGElement !== "undefined" && this.target instanceof SVGElement);
+
     let transformState: TransformState | null = null;
     if (isDOM) {
       transformState = this.getTransformState(this.target);
     }
+
     for (const key in this.vars) {
       if (RESERVED_KEYS.has(key)) continue;
+
       const endValueRaw = this.vars[key];
       const parsedEnd = this.parseValue(endValueRaw);
 
-      let startValue = 0;
+      let currentVal = 0;
       let unit = parsedEnd.unit;
+
       const isTransform = isDOM && TRANSFORM_KEYS.has(key);
 
       if (isTransform && transformState) {
-        startValue = transformState[key as keyof TransformState];
+        currentVal = transformState[key as keyof TransformState];
       } else if (isDOM) {
         const computedStyle = window.getComputedStyle(this.target);
         const styleVal =
           computedStyle[key as any] || this.target.style[key as any];
         const parsedStart = this.parseValue(styleVal);
-        startValue = parsedStart.value;
-
+        currentVal = parsedStart.value;
         if (unit === "" && parsedStart.unit !== "") {
           unit = parsedStart.unit;
         }
       } else {
-        startValue =
+        currentVal =
           typeof this.target[key] === "number" ? this.target[key] : 0;
+      }
+
+      let startValue = 0;
+      let endValue = 0;
+
+      if (this.fromVars) {
+        const parsedFrom = this.parseValue(this.fromVars[key]);
+        startValue = parsedFrom.value;
+        endValue = parsedEnd.value;
+        unit = parsedEnd.unit || parsedFrom.unit || unit;
+      } else if (this.isFrom) {
+        startValue = parsedEnd.value;
+        endValue = currentVal;
+      } else {
+        startValue = currentVal;
+        endValue = parsedEnd.value;
       }
 
       this.propTweens.push({
         key,
         isTransform,
         start: startValue,
-        end: parsedEnd.value,
+        end: endValue,
         unit,
       });
+
+      if (this.isFrom || this.fromVars) {
+        if (isTransform && transformState) {
+          transformState[key as keyof TransformState] = startValue;
+        } else if (isDOM) {
+          this.target.style[key as any] = startValue + unit;
+        } else {
+          this.target[key] = startValue;
+        }
+      }
+    }
+
+    if ((this.isFrom || this.fromVars) && transformState && isDOM) {
+      this.applyTransform(this.target, transformState);
     }
   }
 
@@ -114,22 +164,18 @@ export class Tween {
     if (typeof val === "number") {
       return { value: val, unit: "" };
     }
-
     const num = parseFloat(val);
-
     if (isNaN(num)) {
       return { value: 0, unit: "" };
     }
-
     const unit = String(val).replace(/^[-\d.]+/, "");
-
     return { value: num, unit };
   }
+
   private getTransformState(el: any): TransformState {
     if (!el._fluxoTransform) {
       el._fluxoTransform = { x: 0, y: 0, rotation: 0, scale: 1 };
     }
-
     return el._fluxoTransform;
   }
 

@@ -190,17 +190,38 @@
         </div>
 
         <div class="controls">
-          <button class="btn-primary" id="btn-animate">Run Animation</button>
-          <button class="btn-secondary" id="btn-reset">Reset</button>
-          <button class="btn-secondary" id="btn-scale">
-            Pulse (Scale & Rotate)
+          <button class="btn-primary" id="btn-animate">Run .to()</button>
+          <button
+            class="btn-primary"
+            id="btn-from"
+            style="
+              background: var(--secondary);
+              box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+            "
+          >
+            Run .from()
           </button>
+          <button
+            class="btn-primary"
+            id="btn-from-to"
+            style="
+              background: linear-gradient(
+                135deg,
+                var(--primary),
+                var(--secondary)
+              );
+            "
+          >
+            Run .fromTo()
+          </button>
+          <button class="btn-secondary" id="btn-scale">Pulse</button>
           <button class="btn-secondary" id="btn-fade">Fade Out</button>
+          <button class="btn-secondary" id="btn-reset">Reset</button>
         </div>
 
         <div class="console" id="console">
           <div class="console-line">
-            > System ready. Press "Run Animation" to test Fluxo.
+            > System ready. Test fluxo.to(), .from() or .fromTo()!
           </div>
         </div>
       </div>
@@ -208,10 +229,8 @@
 
     <script type="module">
       import { fluxo } from "../../dist/index.js";
-
       const box = document.getElementById("box");
       const consoleEl = document.getElementById("console");
-
       function log(message) {
         const line = document.createElement("div");
         line.className = "console-line";
@@ -221,20 +240,58 @@
       }
 
       document.getElementById("btn-animate").addEventListener("click", () => {
-        log("Starting animation: x -> 300px, rotation -> 360deg - slow");
+        log("Running: fluxo.to(box, { x: 300, rotation: 360, duration: 1.5 })");
 
         fluxo.to(box, {
-          x: 200,
+          x: 300,
           rotation: 360,
-          duration: 2,
-          ease: "slow.out",
-          onStart: () => log("Animation started!"),
-          onComplete: () => log("Animation complete! (Ticker paused)"),
+          duration: 1.5,
+          ease: "medium.out",
+          onStart: () => log(".to() animation started!"),
+          onComplete: () => log(".to() animation complete!"),
         });
       });
 
+      document.getElementById("btn-from").addEventListener("click", () => {
+        log(
+          "Running: fluxo.from(box, { x: 300, rotation: 180, duration: 1.5 })",
+        );
+
+        fluxo.from(box, {
+          x: 300,
+          rotation: 180,
+          duration: 1.5,
+          ease: "medium.out",
+          onStart: () =>
+            log(".from() animation started! (Box snapped immediately)"),
+          onComplete: () => log(".from() animation complete!"),
+        });
+      });
+
+      document.getElementById("btn-from-to").addEventListener("click", () => {
+        log(
+          "Running: fluxo.fromTo(box, { x: -50, scale: 0.5 }, { x: 250, scale: 1.2, duration: 1.5 })",
+        );
+
+        fluxo.fromTo(
+          box,
+          {
+            x: -50,
+            scale: 0.5,
+          },
+          {
+            x: 250,
+            scale: 1.2,
+            duration: 1.5,
+            ease: "medium.out",
+            onStart: () => log(".fromTo() animation started!"),
+            onComplete: () => log(".fromTo() animation complete!"),
+          },
+        );
+      });
+
       document.getElementById("btn-reset").addEventListener("click", () => {
-        log("Resetting box to origin...");
+        log("Resetting box to default origin...");
 
         fluxo.to(box, {
           x: 0,
@@ -248,15 +305,13 @@
       });
 
       document.getElementById("btn-scale").addEventListener("click", () => {
-        log("Starting pulse animation...");
-
+        log("Starting pulse...");
         fluxo.to(box, {
           scale: 1.4,
           rotation: 180,
           duration: 0.6,
-          ease: "slow.out",
+          ease: "medium.out",
           onComplete: () => {
-            log("Pulse peak reached. Returning to normal...");
             fluxo.to(box, {
               scale: 1,
               rotation: 360,
@@ -273,7 +328,6 @@
           opacity: 0.2,
           duration: 1,
           ease: "slow.out",
-          onComplete: () => log("Fade out complete"),
         });
       });
     </script>

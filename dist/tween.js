@@ -12,6 +12,8 @@ const RESERVED_KEYS = new Set([
 export class Tween {
     target;
     vars;
+    fromVars;
+    isFrom = false;
     duration;
     delay;
     ease;
@@ -19,7 +21,7 @@ export class Tween {
     started = false;
     completed = false;
     propTweens = [];
-    constructor(target, vars) {
+    constructor(target, vars, fromVars, isFrom = false) {
         if (typeof target === "string" && typeof document !== "undefined") {
             this.target = document.querySelector(target);
         }
@@ -27,11 +29,17 @@ export class Tween {
             this.target = target;
         }
         this.vars = vars;
+        this.fromVars = fromVars;
+        this.isFrom = isFrom;
         this.duration = vars.duration !== undefined ? vars.duration : 0.5;
         this.delay = vars.delay !== undefined ? vars.delay : 0;
         this.ease = getEasing(vars.ease);
         this.update = this.update.bind(this);
         if (this.target) {
+            if (this.isFrom || this.fromVars) {
+                this.initProperties();
+                this.started = true;
+            }
             ticker.add(this.update);
         }
     }
@@ -48,32 +56,62 @@ export class Tween {
                 continue;
             const endValueRaw = this.vars[key];
             const parsedEnd = this.parseValue(endValueRaw);
-            let startValue = 0;
+            let currentVal = 0;
             let unit = parsedEnd.unit;
             const isTransform = isDOM && TRANSFORM_KEYS.has(key);
             if (isTransform && transformState) {
-                startValue = transformState[key];
+                currentVal = transformState[key];
             }
             else if (isDOM) {
                 const computedStyle = window.getComputedStyle(this.target);
                 const styleVal = computedStyle[key] || this.target.style[key];
                 const parsedStart = this.parseValue(styleVal);
-                startValue = parsedStart.value;
+                currentVal = parsedStart.value;
                 if (unit === "" && parsedStart.unit !== "") {
                     unit = parsedStart.unit;
                 }
             }
             else {
-                startValue =
+                currentVal =
                     typeof this.target[key] === "number" ? this.target[key] : 0;
+            }
+            let startValue = 0;
+            let endValue = 0;
+            if (this.fromVars) {
+                const parsedFrom = this.parseValue(this.fromVars[key]);
+                startValue = parsedFrom.value;
+                endValue = parsedEnd.value;
+                unit = parsedEnd.unit || parsedFrom.unit || unit;
+            }
+            else if (this.isFrom) {
+                startValue = parsedEnd.value;
+                endValue = currentVal;
+            }
+            else {
+                startValue = currentVal;
+                endValue = parsedEnd.value;
             }
             this.propTweens.push({
                 key,
                 isTransform,
                 start: startValue,
-                end: parsedEnd.value,
+                end: endValue,
                 unit,
             });
+            if (this.isFrom || this.fromVars) {
+                if (isTransform && transformState) {
+                    transformState[key] = startValue;
+                }
+                else if (isDOM) {
+                    this.target.style[key] = startValue + unit;
+                }
+                else {
+                    this.target[key] = startValue;
+                }
+            }
+        }
+        if ((this.isFrom || this.fromVars) && transformState && isDOM) {
+            this.applyTransform(this.target, transformState);
         }
     }
     parseValue(val) {
