@@ -1,4 +1,6 @@
-# Fluxo Animation
+# Fluxo Engine
+
+![Fluxo Engine Banner](assets/fluxo-cover.png)
 
 A lightweight, high-performance, and buttery-smooth TypeScript animation library. Coordinate tweening, timelines, scroll binds, staggers, and vector drawing with 0% idle CPU and zero scroll lag.
 
