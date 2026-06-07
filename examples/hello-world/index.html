@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Fluxo - Hello World Demo</title>
+    <title>Fluxo - Animation Library Demo</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -51,7 +51,7 @@
       }
 
       .container {
-        max-width: 800px;
+        max-width: 900px;
         width: 100%;
         padding: 2rem;
         display: flex;
@@ -110,6 +110,23 @@
         border-radius: 18px;
         box-shadow: 0 10px 25px rgba(139, 92, 246, 0.4);
         cursor: pointer;
+      }
+
+      .stagger-container {
+        display: none;
+        width: 100%;
+        height: 100%;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+      }
+
+      .mini-box {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, var(--secondary), var(--primary));
+        border-radius: 12px;
+        box-shadow: 0 6px 15px rgba(236, 72, 153, 0.3);
       }
 
       .controls {
@@ -187,6 +204,13 @@
       <div class="card">
         <div class="stage">
           <div class="box" id="box"></div>
+          <div class="stagger-container" id="stagger-container">
+            <div class="mini-box"></div>
+            <div class="mini-box"></div>
+            <div class="mini-box"></div>
+            <div class="mini-box"></div>
+            <div class="mini-box"></div>
+          </div>
         </div>
 
         <div class="controls">
@@ -216,6 +240,16 @@
           </button>
           <button
             class="btn-primary"
+            id="btn-stagger"
+            style="
+              background: #3b82f6;
+              box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+            "
+          >
+            Run Stagger
+          </button>
+          <button
+            class="btn-primary"
             id="btn-timeline"
             style="
               background: #10b981;
@@ -234,7 +268,7 @@
 
         <div class="console" id="console">
           <div class="console-line">
-            > System ready. Test fluxo.timeline() with play/pause!
+            > System ready. Test staggers and timelines!
           </div>
         </div>
       </div>
@@ -242,9 +276,13 @@
 
     <script type="module">
       import { fluxo } from "../../dist/index.js";
+
       const box = document.getElementById("box");
+      const staggerContainer = document.getElementById("stagger-container");
+      const miniBoxes = document.querySelectorAll(".mini-box");
       const consoleEl = document.getElementById("console");
       let currentTimeline = null;
+
       function log(message) {
         const line = document.createElement("div");
         line.className = "console-line";
@@ -253,7 +291,18 @@
         consoleEl.scrollTop = consoleEl.scrollHeight;
       }
 
+      function showStageMode(mode) {
+        if (mode === "single") {
+          box.style.display = "block";
+          staggerContainer.style.display = "none";
+        } else {
+          box.style.display = "none";
+          staggerContainer.style.display = "flex";
+        }
+      }
+
       document.getElementById("btn-animate").addEventListener("click", () => {
+        showStageMode("single");
         log("Running: fluxo.to(box, { x: 300, rotation: 360, duration: 1.5 })");
 
         fluxo.to(box, {
@@ -267,6 +316,7 @@
       });
 
       document.getElementById("btn-from").addEventListener("click", () => {
+        showStageMode("single");
         log(
           "Running: fluxo.from(box, { x: 300, rotation: 180, duration: 1.5 })",
         );
@@ -282,6 +332,7 @@
       });
 
       document.getElementById("btn-from-to").addEventListener("click", () => {
+        showStageMode("single");
         log(
           "Running: fluxo.fromTo(box, { x: -50, scale: 0.5 }, { x: 250, scale: 1.2, duration: 1.5 })",
         );
@@ -303,7 +354,34 @@
         );
       });
 
+      document.getElementById("btn-stagger").addEventListener("click", () => {
+        showStageMode("stagger");
+        log(
+          'Running: fluxo.fromTo(".mini-box", { y: -100, opacity: 0, scale: 0.2 }, { y: 0, opacity: 1, scale: 1, stagger: 0.15 })',
+        );
+
+        fluxo.fromTo(
+          ".mini-box",
+          {
+            y: -100,
+            opacity: 0,
+            scale: 0.2,
+          },
+          {
+            y: 0,
+            opacity: 1,
+            scale: 1,
+            duration: 0.8,
+            stagger: 0.15,
+            ease: "medium.out",
+            onStart: () => log("Stagger animation started!"),
+            onComplete: () => log("Stagger complete! All 5 boxes animated."),
+          },
+        );
+      });
+
       document.getElementById("btn-timeline").addEventListener("click", () => {
+        showStageMode("single");
         log("Creating and playing new Timeline...");
 
         box.style.transform =
@@ -313,10 +391,12 @@
         if (currentTimeline) {
           currentTimeline.kill();
         }
+
         currentTimeline = fluxo.timeline({
           onStart: () => log("Timeline started!"),
-          onComplete: () => log("Timeline finished! (All steps processed)"),
+          onComplete: () => log("Timeline finished!"),
         });
+
         currentTimeline
           .to(box, { x: 250, duration: 1.0, ease: "medium.out" })
           .to(box, { y: 60, duration: 0.8, ease: "medium.out" })
@@ -347,7 +427,8 @@
       });
 
       document.getElementById("btn-reset").addEventListener("click", () => {
-        log("Resetting box to default origin...");
+        log("Resetting stage to default origin...");
+        showStageMode("single");
         if (currentTimeline) {
           currentTimeline.kill();
           currentTimeline = null;
@@ -366,6 +447,7 @@
       });
 
       document.getElementById("btn-scale").addEventListener("click", () => {
+        showStageMode("single");
         log("Starting pulse...");
         fluxo.to(box, {
           scale: 1.4,
@@ -384,6 +466,7 @@
       });
 
       document.getElementById("btn-fade").addEventListener("click", () => {
+        showStageMode("single");
         log("Fading out...");
         fluxo.to(box, {
           opacity: 0.2,

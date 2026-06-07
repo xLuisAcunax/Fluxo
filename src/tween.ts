@@ -1,5 +1,6 @@
 import { ticker } from "./ticker.js";
 import { getEasing, EasingFunction, EasingName } from "./easings.js";
+import { resolveTargets } from "./utils.js";
 
 export interface TweenVars {
   duration?: number;
@@ -58,11 +59,8 @@ export class Tween {
     fromVars?: TweenVars,
     isFrom: boolean = false,
   ) {
-    if (typeof target === "string" && typeof document !== "undefined") {
-      this.target = document.querySelector(target);
-    } else {
-      this.target = target;
-    }
+    const resolved = resolveTargets(target);
+    this.target = resolved.length > 0 ? resolved[0] : null;
 
     this.vars = vars;
     this.fromVars = fromVars;
@@ -81,7 +79,6 @@ export class Tween {
         this.started = true;
       }
 
-      // Solo registrar en el Ticker si el usuario no especificó autoPlay: false
       if (autoPlay) {
         ticker.add(this.update);
       }
@@ -189,10 +186,6 @@ export class Tween {
     el.style.transform = `translate3d(${state.x}px, ${state.y}px, 0px) rotate(${state.rotation}deg) scale(${state.scale})`;
   }
 
-  /**
-   * Renderiza el frame del tween en un tiempo específico transcurrido (time).
-   * Este método puede ser llamado externamente (por un Timeline) o internamente (por el Ticker).
-   */
   public render(time: number) {
     if (this.completed && time >= this.duration + this.delay) return;
 

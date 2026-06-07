@@ -1,5 +1,6 @@
 import { Tween } from "./tween.js";
 import { ticker } from "./ticker.js";
+import { resolveTargets } from "./utils.js";
 export class Timeline {
     children = [];
     vars;
@@ -17,19 +18,49 @@ export class Timeline {
             this.play();
         }
     }
+    /**
+     * Adds .to() tweens to the timeline. Supports multiple targets and stagger.
+     */
     to(target, vars, position) {
-        const tween = new Tween(target, { ...vars, autoPlay: false });
-        this.add(tween, position);
+        const targets = resolveTargets(target);
+        const baseTime = this.parsePosition(position);
+        const stagger = vars.stagger || 0;
+        const tweenVars = { ...vars };
+        delete tweenVars.stagger;
+        targets.forEach((t, i) => {
+            const tween = new Tween(t, { ...tweenVars, autoPlay: false });
+            this.addTween(tween, baseTime + i * stagger);
+        });
         return this;
     }
+    /**
+     * Adds .from() tweens to the timeline. Supports multiple targets and stagger.
+     */
     from(target, vars, position) {
-        const tween = new Tween(target, { ...vars, autoPlay: false }, undefined, true);
-        this.add(tween, position);
+        const targets = resolveTargets(target);
+        const baseTime = this.parsePosition(position);
+        const stagger = vars.stagger || 0;
+        const tweenVars = { ...vars };
+        delete tweenVars.stagger;
+        targets.forEach((t, i) => {
+            const tween = new Tween(t, { ...tweenVars, autoPlay: false }, undefined, true);
+            this.addTween(tween, baseTime + i * stagger);
+        });
         return this;
     }
+    /**
+     * Adds .fromTo() tweens to the timeline. Supports multiple targets and stagger.
+     */
     fromTo(target, fromVars, toVars, position) {
-        const tween = new Tween(target, { ...toVars, autoPlay: false }, fromVars);
-        this.add(tween, position);
+        const targets = resolveTargets(target);
+        const baseTime = this.parsePosition(position);
+        const stagger = toVars.stagger || 0;
+        const tweenVars = { ...toVars };
+        delete tweenVars.stagger;
+        targets.forEach((t, i) => {
+            const tween = new Tween(t, { ...tweenVars, autoPlay: false }, fromVars);
+            this.addTween(tween, baseTime + i * stagger);
+        });
         return this;
     }
     play() {
@@ -56,7 +87,10 @@ export class Timeline {
             child.tween.kill();
         }
     }
-    add(tween, position) {
+    /**
+     * Helper to parse relative and absolute positions.
+     */
+    parsePosition(position) {
         let startTime = this.duration;
         const prevChild = this.children[this.children.length - 1];
         if (position !== undefined) {
@@ -89,6 +123,12 @@ export class Timeline {
                 }
             }
         }
+        return startTime;
+    }
+    /**
+     * Appends an individual Tween into the children list at a specific absolute start time.
+     */
+    addTween(tween, startTime) {
         const tweenDuration = tween.duration + tween.delay;
         const endTime = startTime + tweenDuration;
         this.children.push({

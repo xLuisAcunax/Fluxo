@@ -25,10 +25,6 @@ export declare class Tween {
     private parseValue;
     private getTransformState;
     private applyTransform;
-    /**
-     * Renderiza el frame del tween en un tiempo específico transcurrido (time).
-     * Este método puede ser llamado externamente (por un Timeline) o internamente (por el Ticker).
-     */
     render(time: number): void;
     private update;
     kill(): void;

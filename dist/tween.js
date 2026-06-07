@@ -1,5 +1,6 @@
 import { ticker } from "./ticker.js";
 import { getEasing } from "./easings.js";
+import { resolveTargets } from "./utils.js";
 const TRANSFORM_KEYS = new Set(["x", "y", "rotation", "scale"]);
 const RESERVED_KEYS = new Set([
     "duration",
@@ -23,12 +24,8 @@ export class Tween {
     completed = false;
     propTweens = [];
     constructor(target, vars, fromVars, isFrom = false) {
-        if (typeof target === "string" && typeof document !== "undefined") {
-            this.target = document.querySelector(target);
-        }
-        else {
-            this.target = target;
-        }
+        const resolved = resolveTargets(target);
+        this.target = resolved.length > 0 ? resolved[0] : null;
         this.vars = vars;
         this.fromVars = fromVars;
         this.isFrom = isFrom;
@@ -42,7 +39,6 @@ export class Tween {
                 this.initProperties();
                 this.started = true;
             }
-            // Solo registrar en el Ticker si el usuario no especificó autoPlay: false
             if (autoPlay) {
                 ticker.add(this.update);
             }
@@ -139,10 +135,6 @@ export class Tween {
     applyTransform(el, state) {
         el.style.transform = `translate3d(${state.x}px, ${state.y}px, 0px) rotate(${state.rotation}deg) scale(${state.scale})`;
     }
-    /**
-     * Renderiza el frame del tween en un tiempo específico transcurrido (time).
-     * Este método puede ser llamado externamente (por un Timeline) o internamente (por el Ticker).
-     */
     render(time) {
         if (this.completed && time >= this.duration + this.delay)
             return;
