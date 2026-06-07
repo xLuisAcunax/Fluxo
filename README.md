@@ -33,3 +33,119 @@ pnpm add fluxo-animation
 # yarn
 yarn add fluxo-animation
 ```
+
+### CDN Global Import
+
+For direct HTML usage without a bundler, import Fluxo from jsDelivr or unpkg:
+
+```html
+<!-- Via jsDelivr -->
+<script src="https://cdn.jsdelivr.net/npm/fluxo-animation@latest/dist/index.global.js"></script>
+
+<!-- Via unpkg -->
+<script src="https://unpkg.com/fluxo-animation@latest/dist/index.global.js"></script>
+```
+
+---
+
+## Quick Start
+
+### 1. Modern ESM Import (Vite, Next.js, Rollup, webpack)
+
+```javascript
+import { fluxo } from "fluxo-animation";
+
+// Animate a box element 200px on X and rotate 180 degrees
+fluxo.to(".box", {
+  x: 200,
+  rotation: 180,
+  duration: 1.2,
+  ease: "medium.out",
+});
+```
+
+### 2. Direct Browser HTML Script (CDN)
+
+When loaded via a CDN, the library exposes a global `fluxo` object on the `window` scope:
+
+```html
+<div class="box" style="width: 80px; height: 80px; background: #8b5cf6;"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/fluxo-animation@latest/dist/index.global.js"></script>
+<script>
+  fluxo.to(".box", {
+    x: 300,
+    rotation: 360,
+    duration: 1.5,
+    repeat: -1,
+    alternate: true,
+    ease: "slow.inOut",
+  });
+</script>
+```
+
+---
+
+## Advanced Usage
+
+### Timelines
+
+Easily sequence animations using chronological timelines with overlap controls:
+
+```javascript
+import { fluxo } from "fluxo-animation";
+
+const tl = fluxo.timeline({ repeat: -1, alternate: true });
+
+tl.to(".element-1", { x: 100, duration: 1.0 })
+  .to(".element-2", { y: 50, duration: 0.8 }, "-=0.4") // Overlap by 0.4 seconds
+  .to(".element-3", { scale: 1.2, duration: 0.6 }, "<"); // Sync start with previous tween
+```
+
+### Scroll Animations
+
+Bind animation progression directly to your scrollbar:
+
+```javascript
+import { fluxo } from "fluxo-animation";
+
+fluxo.fromTo(
+  ".scroll-box",
+  { scale: 0.5, opacity: 0.1 },
+  {
+    scale: 1.3,
+    opacity: 1,
+    scroll: {
+      trigger: ".scroll-box",
+      start: "top 85%",
+      end: "bottom 20%",
+      scrub: true,
+    },
+  },
+);
+```
+
+---
+
+## Development
+
+If you want to contribute or modify Fluxo:
+
+1. Clone the repository and install dev dependencies:
+   ```bash
+   npm install
+   ```
+2. Build the distribution assets:
+   ```bash
+   npm run build
+   ```
+3. Run in watch mode during development:
+   ```bash
+   npm run watch
+   ```
+
+---
+
+## License
+
+MIT License. Free for both personal and commercial use.
