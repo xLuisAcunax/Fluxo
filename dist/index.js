@@ -148,7 +148,16 @@ export const fluxo = {
      * Creates a new Timeline instance for sequencing multiple animations.
      */
     timeline(vars) {
-        return new Timeline(vars);
+        const hasScrollTrigger = vars?.scrollTrigger !== undefined;
+        const timelineVars = { ...vars };
+        if (hasScrollTrigger) {
+            timelineVars.paused = true;
+        }
+        const tl = new Timeline(timelineVars);
+        if (hasScrollTrigger && vars?.scrollTrigger) {
+            new ScrollTrigger(tl, vars.scrollTrigger);
+        }
+        return tl;
     },
     /**
      * Splits text of DOM elements into individual character or word spans,

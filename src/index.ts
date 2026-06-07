@@ -2,6 +2,14 @@ import { Tween, TweenVars } from "./tween.js";
 import { Timeline, TimelineVars } from "./timeline.js";
 import { ScrollTrigger, ScrollTriggerVars } from "./scrollTrigger.js";
 import { resolveTargets, splitText, drawSVG } from "./utils.js";
+import {
+  magnetic,
+  tilt,
+  explodeOnScroll,
+  implodeOnScroll,
+  revealText,
+  scrollReveal,
+} from "./effects.js";
 
 export const fluxo = {
   /**
@@ -179,8 +187,21 @@ export const fluxo = {
   /**
    * Creates a new Timeline instance for sequencing multiple animations.
    */
-  timeline(vars?: TimelineVars): Timeline {
-    return new Timeline(vars);
+  timeline(vars?: TimelineVars & { scrollTrigger?: any }): Timeline {
+    const hasScrollTrigger = vars?.scrollTrigger !== undefined;
+    const timelineVars = { ...vars };
+
+    if (hasScrollTrigger) {
+      timelineVars.paused = true;
+    }
+
+    const tl = new Timeline(timelineVars);
+
+    if (hasScrollTrigger && vars?.scrollTrigger) {
+      new ScrollTrigger(tl, vars.scrollTrigger);
+    }
+
+    return tl;
   },
 
   /**

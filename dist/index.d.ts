@@ -19,7 +19,9 @@ export declare const fluxo: {
     /**
      * Creates a new Timeline instance for sequencing multiple animations.
      */
-    timeline(vars?: TimelineVars): Timeline;
+    timeline(vars?: TimelineVars & {
+        scrollTrigger?: any;
+    }): Timeline;
     /**
      * Splits text of DOM elements into individual character or word spans,
      * making them ready for cascaded stagger animations.
